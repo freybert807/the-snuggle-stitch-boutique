@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Perfil de Adoptante - The Snuggle Stitch Boutique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: #fff9f2;
+        }
+
+        .font-display {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .asymmetric-card {
+            border-radius: 2rem 1rem 2.5rem 1.5rem;
+        }
+
+        .soft-shadow {
+            box-shadow: 0 15px 45px rgba(61, 52, 49, 0.08);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased overflow-x-hidden">
+    <!-- Navbar (Mini) -->
+    <nav class="p-6 flex items-center justify-between bg-white/80 backdrop-blur-md border-b border-rosa-salina/10">
+        <h1 class="font-display text-xl font-black italic text-[#7b9acc]">Mi Perfil Munay</h1>
+        <div
+            class="w-10 h-10 rounded-full bg-rosa-salina/10 flex items-center justify-center text-rosa-salina cursor-pointer hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined">settings</span>
+        </div>
+    </nav>
+
+    <main class="p-6 max-w-2xl mx-auto space-y-12 py-12">
+        <!-- Profile Header -->
+        <section class="text-center space-y-4">
+            <div class="relative inline-block">
+                <div class="w-36 h-36 rounded-full border-4 border-white shadow-2xl overflow-hidden bg-white">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Frey&backgroundColor=7b9acc" alt="Avatar"
+                        class="w-full h-full object-cover">
+                </div>
+                <div
+                    class="absolute -bottom-2 -right-2 bg-amarillo-retama text-slate-800 text-[10px] font-black px-4 py-2 rounded-full shadow-lg border-2 border-white uppercase tracking-widest italic">
+                    Guardián de Abrazos
+                </div>
+            </div>
+            <div class="space-y-1">
+                <h2 class="font-display text-3xl font-black italic text-slate-800">Freybert Eduardo</h2>
+                <p class="text-sm font-medium text-slate-400 italic">"Tejiendo sueños y coleccionando nubes en el Cusco"
+                </p>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-[2.5rem] text-center soft-shadow border border-white">
+                <span class="block text-3xl font-black text-secondary">12</span>
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Amiguitos</span>
+            </div>
+            <div class="bg-white p-6 rounded-[2.5rem] text-center soft-shadow border border-white">
+                <span class="block text-3xl font-black text-primary">∞</span>
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Ayni</span>
+            </div>
+            <div class="bg-white p-6 rounded-[2.5rem] text-center soft-shadow border border-white">
+                <span class="block text-3xl font-black text-amarillo-retama">4</span>
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Favoritos</span>
+            </div>
+        </div>
+
+        <!-- Favorites Section -->
+        <section class="space-y-6 bg-white/50 p-8 rounded-[3rem] border-2 border-dashed border-rosa-salina/10">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-rosa-salina">favorite_heart</span>
+                <h3 class="font-display text-xl font-bold italic text-slate-800">Mi Círculo de Ternura</h3>
+            </div>
+
+            <div class="flex gap-8 overflow-x-auto no-scrollbar pb-4">
+                <div class="shrink-0 w-32 space-y-3 text-center group cursor-pointer">
+                    <div
+                        class="w-32 h-32 rounded-[2rem] bg-white soft-shadow border-2 border-white overflow-hidden group-hover:-translate-y-2 transition-transform">
+                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBijgstwbSwKf1Z0lZu-nMWq6utBctxymqp-yzCru7a8_dPVjaaI-vNABvYQL9vL59ne5LB0972v2goQOCmh-izfrM1gUzHvCeGDm5ztJ9NI_wRDZsCZ0EACDFb6nnZNdjBQr0_gVh_X4ByZkXwNyz04fvi_YGCKVIMm8QhoScq0kFezWPp4z7LST8jpOfVkk61DDtQjDHYihw8KdINq2LXfsLOLi94gBXkyEo6"
+                            class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest">Stitch Munay</span>
+                </div>
+                <!-- Placeholder -->
+                <div class="shrink-0 w-32 space-y-3 text-center group opacity-30 cursor-pointer">
+                    <div
+                        class="w-32 h-32 rounded-[2rem] border-4 border-dashed border-slate-200 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-slate-300 text-4xl">add</span>
+                    </div>
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Añadir Otro</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Action -->
+        <div class="text-center pt-8">
+            <button onclick="navTo('#home')"
+                class="px-10 py-4 bg-slate-800 text-white rounded-full font-black text-[10px] uppercase tracking-[0.3em] shadow-xl shadow-slate-200 hover:bg-rosa-salina transition-all">
+                Volver al Hogar
+            </button>
+        </div>
+    </main>
+
+    <footer class="text-center pb-12 opacity-30 mt-auto">
+        <p class="text-[9px] font-black uppercase tracking-[0.4em]">Hecho con mucho Munay desde Cusco</p>
+    </footer>
+
+    <script>
+        function navTo(hash) {
+            window.parent.postMessage({ type: 'navigate', hash: hash }, '*');
+        }
+    </script>
+</body>
+
+</html>

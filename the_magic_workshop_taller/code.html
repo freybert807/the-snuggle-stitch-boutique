@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Taller Ayni - The Snuggle Stitch Boutique</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "crema-lana": "#fff9f2",
+                        "rosa-salina": "#f4b0a4",
+                        "azul-atardecer": "#7b9acc",
+                        "amarillo-retama": "#f9e89d",
+                        "verde-salvia": "#b7c9b0",
+                        "primary": "#f4b0a4",
+                    },
+                    fontFamily: {
+                        "display": ["Playfair Display", "serif"],
+                        "body": ["Quicksand", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: #fff9f2;
+        }
+
+        .font-display {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .asymmetric-card {
+            border-radius: 3rem 1.5rem 3.5rem 2rem;
+        }
+
+        .soft-shadow {
+            box-shadow: 0 15px 45px rgba(61, 52, 49, 0.08);
+        }
+
+        .stitch-border {
+            border: 4px dashed #f4b0a4;
+            border-radius: 32px;
+            position: relative;
+        }
+
+        @keyframes crochet {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            50% {
+                transform: translate(0, -20px) rotate(15deg);
+            }
+        }
+
+        .crochet-needle {
+            animation: crochet 1.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+    <!-- Navbar (Mini) -->
+    <nav
+        class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-rosa-salina/10 px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="bg-rosa-salina p-2 rounded-full text-white shadow-lg">
+                <span class="material-symbols-outlined text-2xl">auto_fix_high</span>
+            </div>
+            <h1 class="font-display text-xl font-black italic text-slate-800">Taller Ayni</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="navTo('#cart')"
+                class="p-2 text-slate-300 hover:text-rosa-salina relative transition-colors">
+                <span class="material-symbols-outlined text-2xl">shopping_bag</span>
+                <span
+                    class="absolute top-1 right-1 bg-azul-atardecer text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full">2</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="flex-1 p-6 flex flex-col gap-8 max-w-4xl mx-auto w-full pb-24">
+        <header class="text-center space-y-4 py-8">
+            <div
+                class="inline-block px-4 py-1 bg-rosa-salina/10 text-rosa-salina rounded-full text-[10px] font-black uppercase tracking-[0.3em]">
+                Estudio Creativo de Ternura
+            </div>
+            <h2 class="font-display text-5xl font-black italic text-slate-800">El <span class="text-rosa-salina">Taller
+                    Ayni</span></h2>
+            <p class="text-slate-400 font-medium italic">"Donde tus sueños más dulces cobran vida punto a punto."</p>
+        </header>
+
+        <section
+            class="bg-white rounded-[4rem] p-10 md:p-16 soft-shadow asymmetric-card border-4 border-dashed border-rosa-salina/10 flex flex-col items-center gap-10 relative overflow-hidden">
+            <!-- Zona de Carga Tactil -->
+            <div class="relative group">
+                <div id="image-frame"
+                    class="w-72 h-72 rounded-full border-4 border-dashed border-rosa-salina flex items-center justify-center bg-rosa-salina/5 overflow-hidden transition-all duration-700 group-hover:bg-rosa-salina/10">
+                    <div id="upload-placeholder" class="text-center p-6">
+                        <span
+                            class="material-symbols-outlined text-rosa-salina text-6xl mb-3 opacity-40">add_a_photo</span>
+                        <p class="text-[10px] font-black text-rosa-salina uppercase tracking-[0.2em]">Sube tu Imagen</p>
+                    </div>
+                    <img id="preview-img" class="hidden w-full h-full object-cover" src="" alt="Referencia">
+                </div>
+                <input type="file" id="file-input" class="hidden" accept="image/*">
+                <button onclick="document.getElementById('file-input').click()"
+                    class="absolute bottom-6 right-6 bg-azul-atardecer text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all border-4 border-white">
+                    <span class="material-symbols-outlined text-3xl">edit</span>
+                </button>
+            </div>
+
+            <div class="w-full space-y-10 max-w-md">
+                <div class="text-center space-y-3">
+                    <h3 class="font-display text-3xl font-black italic text-slate-800">Diseño Personalizado</h3>
+                    <p class="text-slate-400 font-medium italic">"Traducimos tus historias en suavidad de algodón."</p>
+                </div>
+
+                <!-- Input Detallado -->
+                <div class="space-y-4">
+                    <label class="text-[10px] font-black text-rosa-salina uppercase tracking-[0.3em] ml-2">¿Cómo
+                        imaginas a tu compañero?</label>
+                    <input type="text" id="special-details"
+                        placeholder="Ej: con bufanda azul, ojitos brillantes, muy grande..."
+                        class="w-full px-8 py-6 rounded-[2rem] border-none bg-crema-lana shadow-inner focus:ring-2 focus:ring-rosa-salina/20 transition-all outline-none text-slate-700 font-medium italic">
+                </div>
+
+                <!-- Botón WhatsApp -->
+                <button id="whatsapp-btn"
+                    class="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-black py-7 rounded-[2.5rem] shadow-2xl shadow-green-100 flex items-center justify-center gap-4 hover:scale-[1.02] active:scale-95 transition-all text-xl">
+                    <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24">
+                        <path
+                            d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.438 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+                    </svg>
+                    ¡Preguntar por mi Personalizado!
+                </button>
+
+                <p id="confirmation-msg"
+                    class="hidden text-center text-rosa-salina font-black animate-bounce text-xs uppercase tracking-[0.3em]">
+                    ✨ ¡Enviando mensaje al corazón del taller! Abre tu WhatsApp...
+                </p>
+            </div>
+
+            <!-- Overlay de Magia -->
+            <div class="hidden absolute inset-0 bg-white/95 z-50 flex-col items-center justify-center gap-6"
+                id="loading-overlay">
+                <div class="crochet-needle text-7xl">🧶</div>
+                <p class="text-rosa-salina font-black uppercase tracking-[0.4em] text-[10px]">Preparando hilos
+                    mágicos...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center py-12 opacity-30 mt-auto">
+        <p class="text-[9px] font-black uppercase tracking-[0.4em]">Hecho con Munay desde Cusco</p>
+    </footer>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const previewImg = document.getElementById('preview-img');
+        const uploadPlaceholder = document.getElementById('upload-placeholder');
+        const imageFrame = document.getElementById('image-frame');
+        const whatsappBtn = document.getElementById('whatsapp-btn');
+        const detailsInput = document.getElementById('special-details');
+        const confirmationMsg = document.getElementById('confirmation-msg');
+        const loadingOverlay = document.getElementById('loading-overlay');
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                loadingOverlay.classList.remove('hidden');
+                loadingOverlay.classList.add('flex');
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    setTimeout(() => {
+                        previewImg.src = event.target.result;
+                        previewImg.classList.remove('hidden');
+                        uploadPlaceholder.classList.add('hidden');
+                        imageFrame.style.borderStyle = 'solid';
+                        loadingOverlay.classList.add('hidden');
+                        loadingOverlay.classList.remove('flex');
+                    }, 1500);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        whatsappBtn.addEventListener('click', () => {
+            const details = detailsInput.value || "suave y muy tierno";
+            const message = `¡Hola! Vengo de la web de The Snuggle Stitch Boutique. Me encantaría saber si pueden tejer este diseño en el Taller Ayni: ${details}. ¿Me ayudan con una cotización?`;
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/51900000000?text=${encodedMessage}`;
+
+            confirmationMsg.classList.remove('hidden');
+
+            setTimeout(() => {
+                window.open(whatsappUrl, '_blank');
+            }, 1000);
+        });
+
+        function navTo(hash) {
+            window.parent.postMessage({ type: 'navigate', hash: hash }, '*');
+        }
+    </script>
+</body>
+
+</html>

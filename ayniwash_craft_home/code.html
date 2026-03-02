@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>The Snuggle Stitch Boutique - Un rincón de abrazos tejidos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "crema-lana": "#fff9f2",
+                        "rosa-salina": "#f4b0a4",
+                        "azul-atardecer": "#7b9acc",
+                        "amarillo-retama": "#f9e89d",
+                        "verde-salvia": "#b7c9b0",
+                        "primary": "#f4b0a4",
+                        "secondary": "#7b9acc",
+                    },
+                    fontFamily: {
+                        "display": ["Playfair Display", "serif"],
+                        "body": ["Quicksand", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: #fff9f2;
+        }
+
+        .font-display {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .asymmetric-card {
+            border-radius: 2rem 1rem 2.5rem 1.5rem;
+        }
+
+        .soft-shadow {
+            box-shadow: 0 15px 45px rgba(61, 52, 49, 0.08);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #f4b0a4, #7b9acc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #threads-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #f0e8e0 25%, #faeee8 50%, #f0e8e0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased overflow-x-hidden">
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <!-- Configuración del cliente — generado en build, no subido a Git -->
+    <script src="../boutique-config.js"
+        onerror="console.info('[Boutique] boutique-config.js no encontrado, usando fallback.')"></script>
+
+    <!-- Falling Threads Animation -->
+    <canvas id="threads-canvas"></canvas>
+
+    <main class="relative z-10">
+        <!-- Hero Section -->
+        <section
+            class="min-h-[80vh] flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
+            <div
+                class="px-6 py-2 bg-white/60 backdrop-blur rounded-full text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 mb-8 border border-white/40 soft-shadow">
+                Hecho en Cusco con Amor
+            </div>
+            <h1 id="home-title"
+                class="font-display text-5xl md:text-7xl font-black mb-6 leading-tight max-w-4xl gradient-text">
+                Un hilito de ternura, un compañero para siempre.
+            </h1>
+            <p id="home-welcome" class="text-lg md:text-xl text-slate-500 max-w-2xl font-medium mb-12 italic">
+                Bienvenidos a nuestro rincón de abrazos tejidos. Aquí, cada amigurumi nace de un deseo de acompañarte en
+                tus mejores historias.
+            </p>
+            <button onclick="navTo('#shop')"
+                class="group relative px-10 py-5 bg-white text-slate-800 font-bold rounded-full soft-shadow hover:scale-105 active:scale-95 transition-all overflow-hidden">
+                <span class="relative z-10 flex items-center gap-3">
+                    Explorar el Mercadito
+                    <span
+                        class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </span>
+                <div class="absolute inset-0 bg-rosa-salina opacity-0 group-hover:opacity-10 transition-opacity"></div>
+            </button>
+        </section>
+
+        <!-- El Compañero del Mes -->
+        <section class="max-w-6xl mx-auto p-8 mb-24">
+            <div class="flex items-center gap-6 mb-12">
+                <div class="h-px flex-1 bg-rosa-salina/30"></div>
+                <h2 class="font-display text-3xl font-bold">El Compañero del Mes</h2>
+                <div class="h-px flex-1 bg-rosa-salina/30"></div>
+            </div>
+
+            <!-- Loading skeleton -->
+            <div id="featured-loading"
+                class="grid lg:grid-cols-2 gap-12 items-center bg-white p-6 rounded-[3rem] shadow-2xl asymmetric-card border border-white/50">
+                <div class="aspect-square rounded-[2rem] skeleton"></div>
+                <div class="space-y-4 p-4">
+                    <div class="skeleton h-10 rounded-xl w-3/4"></div>
+                    <div class="skeleton h-4 rounded-xl w-full"></div>
+                    <div class="skeleton h-4 rounded-xl w-5/6"></div>
+                    <div class="skeleton h-4 rounded-xl w-4/6"></div>
+                    <div class="flex gap-4 pt-4">
+                        <div class="skeleton h-12 rounded-2xl w-40"></div>
+                        <div class="skeleton h-12 rounded-2xl w-36"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured companion (populated by Supabase) -->
+            <div id="featured-companion"
+                class="hidden grid lg:grid-cols-2 gap-12 items-center bg-white p-6 rounded-[3rem] shadow-2xl asymmetric-card border border-white/50">
+                <div class="aspect-square rounded-[2rem] overflow-hidden soft-shadow relative">
+                    <img id="feat-img" src="" class="w-full h-full object-cover" alt="Compañero del mes">
+                    <div
+                        class="absolute top-6 right-6 bg-amarillo-retama px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg">
+                        Destacado ⭐</div>
+                </div>
+                <div class="space-y-6 lg:p-4">
+                    <h3 id="feat-name" class="font-display text-5xl font-black text-slate-800 italic">—</h3>
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-rosa-salina">favorite</span>
+                        <span class="text-xs font-black uppercase tracking-widest text-[#7b9acc]">Elegido por el
+                            taller</span>
+                    </div>
+                    <p id="feat-story" class="text-slate-500 font-medium leading-relaxed italic text-lg line-clamp-4">
+                        Espere un momento...
+                    </p>
+                    <p id="feat-price" class="text-2xl font-black text-rosa-salina"></p>
+                    <div class="flex flex-wrap gap-4 pt-4">
+                        <button id="feat-btn"
+                            class="px-8 py-4 bg-rosa-salina text-white font-black rounded-2xl shadow-lg hover:shadow-rosa-salina/30 hover:-translate-y-1 transition-all">
+                            Adoptar con Munay
+                        </button>
+                        <button id="read-feat"
+                            class="px-8 py-4 bg-white border-2 border-slate-100 font-bold rounded-2xl text-slate-500 hover:bg-slate-50 transition-all">
+                            Leer su Historia
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No featured state -->
+            <div id="featured-empty" class="hidden text-center py-16">
+                <div class="text-6xl mb-4">🧶</div>
+                <p class="font-display text-2xl italic text-slate-400">El taller está eligiendo al Compañero del Mes...
+                </p>
+                <button onclick="navTo('#shop')"
+                    class="mt-6 px-8 py-3 bg-rosa-salina text-white font-black rounded-full text-sm uppercase tracking-widest shadow-lg hover:scale-105 transition-all">
+                    Ver todos los amiguitos
+                </button>
+            </div>
+        </section>
+
+        <!-- Our Process -->
+        <section class="p-8 mb-24 bg-azul-atardecer/5 py-24 border-y border-azul-atardecer/10">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16 space-y-4">
+                    <h2 class="font-display text-4xl font-black italic">El Viaje de tu Amiguito</h2>
+                    <p class="text-slate-500 font-medium">Desde un ovillo de lana hasta tus brazos</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-white p-8 rounded-[2.5rem] text-center soft-shadow border border-white space-y-4">
+                        <div
+                            class="w-16 h-16 bg-rosa-salina/10 rounded-full flex items-center justify-center mx-auto text-rosa-salina">
+                            <span class="material-symbols-outlined text-3xl">palette</span>
+                        </div>
+                        <h4 class="font-black text-lg">1. Selección</h4>
+                        <p class="text-sm text-slate-500 font-medium">Escoges al compañero que robó tu corazón en el
+                            Mercadito Munay.</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-[2.5rem] text-center soft-shadow border border-white space-y-4">
+                        <div
+                            class="w-16 h-16 bg-azul-atardecer/10 rounded-full flex items-center justify-center mx-auto text-azul-atardecer">
+                            <span class="material-symbols-outlined text-3xl">gesture</span>
+                        </div>
+                        <h4 class="font-black text-lg">2. Tejido</h4>
+                        <p class="text-sm text-slate-500 font-medium">Nuestras manos tejen cada punto con paciencia y
+                            amor infinito (Ayni).</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-[2.5rem] text-center soft-shadow border border-white space-y-4">
+                        <div
+                            class="w-16 h-16 bg-amarillo-retama/10 rounded-full flex items-center justify-center mx-auto text-amarillo-retama">
+                            <span class="material-symbols-outlined text-3xl">verified</span>
+                        </div>
+                        <h4 class="font-black text-lg">3. Adopción</h4>
+                        <p class="text-sm text-slate-500 font-medium">Recibes a tu nuevo amigo con su certificado y
+                            comienza una nueva historia.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cultural Quote -->
+        <section class="max-w-4xl mx-auto p-8 mb-32 text-center text-slate-800">
+            <span class="material-symbols-outlined text-6xl text-rosa-salina mb-8">format_quote</span>
+            <p class="font-display text-4xl italic leading-tight mb-8">
+                "Cada punto cuenta una historia de nuestra cultura, tejida con la paciencia de los Andes y el amor de
+                nuestras manos."
+            </p>
+            <div class="flex items-center gap-4 justify-center">
+                <div class="w-12 h-px bg-rosa-salina"></div>
+                <span class="font-black text-[10px] uppercase tracking-widest text-[#7b9acc]">Alma de Cusco</span>
+                <div class="w-12 h-px bg-rosa-salina"></div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="p-12 bg-white flex flex-col items-center gap-8 text-center border-t border-slate-50">
+            <div class="text-4xl grayscale opacity-30">🧶</div>
+            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Tejido con Munay en Cusco, Perú
+            </p>
+            <div class="flex gap-6">
+                <a href="#" class="text-slate-300 hover:text-rosa-salina transition-colors"><span
+                        class="font-black text-[10px]">INSTAGRAM</span></a>
+                <a href="#" class="text-slate-300 hover:text-rosa-salina transition-colors"><span
+                        class="font-black text-[10px]">TIKTOK</span></a>
+                <a href="#" class="text-slate-300 hover:text-rosa-salina transition-colors"><span
+                        class="font-black text-[10px]">PINTEREST</span></a>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        // ── Supabase Init ─────────────────────────────────────
+        const { createClient } = window.supabase;
+        const _cfg = window.BOUTIQUE_CONFIG || {};
+        const db = createClient(
+            _cfg.supabaseUrl || 'https://inaobamnnfpofjlhpzut.supabase.co',
+            _cfg.supabaseKey || 'sb_publishable_AiCHIxut58y_V3jwgocFaw_aLIUlG72'
+        );
+
+        function navTo(hash) {
+            window.parent.postMessage({ type: 'navigate', hash: hash }, '*');
+        }
+
+        // ── Load text config from localStorage ───────────────
+        function loadTextConfig() {
+            const config = JSON.parse(localStorage.getItem('boutique_config') || '{}');
+            if (config.homeTitle) document.getElementById('home-title').textContent = config.homeTitle;
+            if (config.homeWelcome) document.getElementById('home-welcome').textContent = config.homeWelcome;
+        }
+
+        // ── Load Featured from Supabase ───────────────────────
+        async function loadFeatured() {
+            // Try to get the one marked as Compañero del Mes
+            let { data: featured, error } = await db
+                .from('amigurumis')
+                .select('*')
+                .eq('es_companero_mes', true)
+                .limit(1)
+                .maybeSingle();
+
+            // Fallback: get the most recent one
+            if (!featured && !error) {
+                const { data: first } = await db
+                    .from('amigurumis')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+                featured = first;
+            }
+
+            document.getElementById('featured-loading').classList.add('hidden');
+
+            if (error || !featured) {
+                document.getElementById('featured-empty').classList.remove('hidden');
+                return;
+            }
+
+            // Populate featured section
+            document.getElementById('feat-img').src = featured.img_base64 || '';
+            document.getElementById('feat-name').textContent = featured.nombre;
+            document.getElementById('feat-story').textContent = featured.story || '...';
+            document.getElementById('feat-price').textContent = `S/ ${Number(featured.precio).toFixed(2)}`;
+
+            document.getElementById('feat-btn').onclick = () => {
+                window.parent.postMessage({ type: 'navigate', hash: '#cart' }, '*');
+            };
+            document.getElementById('read-feat').onclick = () => {
+                window.parent.postMessage({ type: 'navigate', hash: '#shop' }, '*');
+                setTimeout(() => {
+                    window.parent.postMessage({ type: 'view-product', id: featured.id }, '*');
+                }, 400);
+            };
+
+            document.getElementById('featured-companion').classList.remove('hidden');
+        }
+
+        // ── Threads Animation ─────────────────────────────────
+        const canvas = document.getElementById('threads-canvas');
+        const ctx = canvas.getContext('2d');
+        let threads = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.onresize = resize;
+        resize();
+
+        class Thread {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = -100;
+                this.length = 50 + Math.random() * 150;
+                this.speed = 0.5 + Math.random() * 1.5;
+                this.color = ['#f4b0a4', '#7b9acc', '#f9e89d'][Math.floor(Math.random() * 3)];
+                this.opacity = 0.1 + Math.random() * 0.4;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x, this.y + this.length);
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 1;
+                ctx.globalAlpha = this.opacity;
+                ctx.stroke();
+                this.y += this.speed;
+                if (this.y > canvas.height) this.reset();
+            }
+        }
+
+        for (let i = 0; i < 40; i++) threads.push(new Thread());
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            threads.forEach(t => t.draw());
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // ── Init ──────────────────────────────────────────────
+        loadTextConfig();
+        loadFeatured();
+
+        // Re-load config text when admin saves
+        window.addEventListener('storage', loadTextConfig);
+    </script>
+</body>
+
+</html>

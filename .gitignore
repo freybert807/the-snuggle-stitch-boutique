@@ -1,0 +1,23 @@
+# The Snuggle Stitch Boutique — .gitignore
+
+# Variables de entorno (NUNCA subir a Git)
+.env
+.env.local
+.env.production
+
+# Configuración generada en build (contiene credenciales)
+boutique-config.js
+
+# Dependencias de Node
+node_modules/
+package-lock.json
+
+# Build artifacts
+dist/
+.vercel/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+*.log

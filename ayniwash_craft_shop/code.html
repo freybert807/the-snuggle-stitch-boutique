@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Mercadito Munay - The Snuggle Stitch Boutique</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "crema-lana": "#fff9f2",
+                        "rosa-salina": "#f4b0a4",
+                        "azul-atardecer": "#7b9acc",
+                        "amarillo-retama": "#f9e89d",
+                        "verde-salvia": "#b7c9b0",
+                        "primary": "#f4b0a4",
+                    },
+                    fontFamily: {
+                        "display": ["Playfair Display", "serif"],
+                        "body": ["Quicksand", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: #fff9f2;
+        }
+
+        .font-display {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .asymmetric-card {
+            border-radius: 2rem 1rem 2.5rem 1.5rem;
+        }
+
+        .soft-shadow {
+            box-shadow: 0 15px 45px rgba(61, 52, 49, 0.08);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #f0e8e0 25%, #faeee8 50%, #f0e8e0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 1.5rem;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-in {
+            animation: slideUp 0.35s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased p-6">
+    <!-- Supabase CDN (UMD) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <!-- Configuración del cliente — generado en build, no subido a Git -->
+    <script src="../boutique-config.js"
+        onerror="console.info('[Boutique] boutique-config.js no encontrado, usando fallback.')"></script>
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Shop Header -->
+        <header class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div class="space-y-2">
+                <div
+                    class="inline-block px-4 py-1 bg-rosa-salina/10 text-rosa-salina rounded-full text-[10px] font-black uppercase tracking-[0.2em]">
+                    Seleccionado con Munay</div>
+                <h1 class="font-display text-5xl md:text-6xl font-black italic text-slate-800">Mercadito Munay</h1>
+                <p class="text-slate-500 font-medium italic">Encuentra al compañero que teja tu próxima historia.</p>
+            </div>
+            <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                <button id="filter-all" onclick="applyFilter('')"
+                    class="px-6 py-2 bg-rosa-salina text-white rounded-full font-black text-xs uppercase tracking-widest shadow-lg">Todos</button>
+                <button id="filter-ami" onclick="applyFilter('amigurumi')"
+                    class="px-6 py-2 bg-white text-slate-400 rounded-full font-bold text-xs uppercase tracking-widest border border-slate-100 hover:bg-slate-50 transition-all">Amigurumis</button>
+                <button id="filter-dest" onclick="applyFilter('destacado')"
+                    class="px-6 py-2 bg-white text-slate-400 rounded-full font-bold text-xs uppercase tracking-widest border border-slate-100 hover:bg-slate-50 transition-all">Destacados</button>
+            </div>
+        </header>
+
+        <!-- Product Grid -->
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-24">
+            <!-- Skeleton loaders -->
+            <div class="skeleton h-80"></div>
+            <div class="skeleton h-80"></div>
+            <div class="skeleton h-80"></div>
+            <div class="skeleton h-80"></div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-24 space-y-4">
+            <div class="text-7xl animate-float">🧶</div>
+            <p class="font-display text-3xl italic text-slate-400">El taller está tejiendo...</p>
+            <p class="text-slate-400 text-sm">Pronto habrá amiguitos esperándote aquí.</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" class="hidden text-center py-24 space-y-4">
+            <span class="material-symbols-outlined text-5xl text-rosa-salina/40">cloud_off</span>
+            <p class="font-display text-2xl italic text-slate-400">No pudimos conectar con el taller.</p>
+            <button onclick="fetchProducts()"
+                class="mt-2 px-6 py-3 bg-rosa-salina text-white rounded-full font-black text-xs uppercase tracking-widest">Reintentar</button>
+        </div>
+
+        <!-- Adoption Modal -->
+        <div id="adoption-modal"
+            class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div
+                class="bg-white w-full max-w-4xl rounded-[3rem] shadow-2xl asymmetric-card overflow-hidden flex flex-col md:flex-row relative">
+                <button onclick="closeModal()"
+                    class="absolute top-6 right-6 z-20 text-slate-300 hover:text-rosa-salina transition-colors bg-white/80 p-2 rounded-full backdrop-blur">
+                    <span class="material-symbols-outlined text-3xl">close</span>
+                </button>
+                <div class="md:w-1/2 aspect-square relative">
+                    <img id="modal-img" src="" class="w-full h-full object-cover">
+                    <div
+                        class="absolute bottom-6 left-6 bg-white/90 backdrop-blur px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-[#7b9acc] shadow-sm">
+                        Nacido en Cusco</div>
+                </div>
+                <div class="md:w-1/2 p-10 flex flex-col justify-center space-y-6">
+                    <div class="space-y-2">
+                        <h2 id="modal-name" class="font-display text-5xl font-black italic text-slate-800">Nombre</h2>
+                        <p id="modal-price" class="text-2xl font-black text-rosa-salina">S/ 0.00</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-rosa-salina">favorite</span>
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Historia de
+                            Adopción</span>
+                    </div>
+                    <p id="modal-story" class="text-slate-500 leading-relaxed italic font-medium text-lg">
+                        Cargando historia mágica...
+                    </p>
+                    <div class="pt-6">
+                        <button onclick="addToCart()"
+                            class="w-full bg-rosa-salina text-white py-6 rounded-2xl text-xl font-black shadow-xl shadow-rosa-salina/20 hover:scale-[1.02] transition-transform flex items-center justify-center gap-3">
+                            <span class="material-symbols-outlined">favorite</span>
+                            ¡Llévalo a tu Pacha!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification"
+        class="fixed bottom-8 right-8 bg-slate-800 text-white p-6 rounded-3xl shadow-2xl flex items-center gap-4 translate-y-32 transition-transform duration-500 z-50 pointer-events-none">
+        <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">🧶</div>
+        <div>
+            <p class="font-black text-xs uppercase tracking-widest">¡Adoptado con Munay!</p>
+            <p class="text-[10px] opacity-60">Tu amigo ya te espera en la cestita.</p>
+        </div>
+    </div>
+
+    <script>
+        // ── Supabase Init ─────────────────────────────────────
+        const { createClient } = window.supabase;
+        const _cfg = window.BOUTIQUE_CONFIG || {};
+        const db = createClient(
+            _cfg.supabaseUrl || 'https://inaobamnnfpofjlhpzut.supabase.co',
+            _cfg.supabaseKey || 'sb_publishable_AiCHIxut58y_V3jwgocFaw_aLIUlG72'
+        );
+
+        let allProducts = [];
+        let activeFilter = '';
+
+        // ── Fetch from Supabase ───────────────────────────────
+        async function fetchProducts() {
+            showSkeletons();
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('error-state').classList.add('hidden');
+
+            const { data, error } = await db
+                .from('amigurumis')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('[Supabase] Error:', error);
+                clearGrid();
+                document.getElementById('error-state').classList.remove('hidden');
+                return;
+            }
+
+            allProducts = data || [];
+            renderProducts(filterData(allProducts, activeFilter));
+        }
+
+        function filterData(products, categoria) {
+            if (!categoria) return products;
+            if (categoria === 'destacado') return products.filter(p => p.es_companero_mes);
+            return products.filter(p => (p.categoria || '').toLowerCase() === categoria.toLowerCase());
+        }
+
+        // ── Render ────────────────────────────────────────────
+        function renderProducts(products) {
+            const grid = document.getElementById('product-grid');
+            clearGrid();
+
+            if (!products || products.length === 0) {
+                document.getElementById('empty-state').classList.remove('hidden');
+                return;
+            }
+
+            grid.innerHTML = products.map((p, i) => `
+                <div onclick="openModal(${p.id})"
+                    class="card-in bg-white p-4 rounded-[2.5rem] soft-shadow border border-white/50 group cursor-pointer hover:-translate-y-2 transition-all"
+                    style="animation-delay:${i * 0.06}s">
+                    <div class="aspect-square rounded-3xl overflow-hidden mb-6 bg-crema-lana relative">
+                        <img src="${p.img_base64 || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23f4b0a422\'/%3E%3C/svg%3E'}"
+                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\'%3E%3Ctext y=\'.9em\' font-size=\'80\'%3E🧶%3C/text%3E%3C/svg%3E'">
+                        <div class="absolute inset-0 bg-rosa-salina/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        ${p.es_companero_mes ? `<div class="absolute top-4 left-4 bg-amarillo-retama px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow">⭐ Mes</div>` : ''}
+                    </div>
+                    <div class="px-2 space-y-1">
+                        <h3 class="font-display text-2xl font-black italic text-slate-800 line-clamp-1">${esc(p.nombre)}</h3>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-black text-rosa-salina uppercase tracking-widest">S/ ${Number(p.precio).toFixed(2)}</span>
+                            <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Ver Detalles</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ── Modal ─────────────────────────────────────────────
+        function openModal(id) {
+            const p = allProducts.find(prod => prod.id == id);
+            if (!p) return;
+            document.getElementById('modal-img').src = p.img_base64 || '';
+            document.getElementById('modal-name').textContent = p.nombre;
+            document.getElementById('modal-price').textContent = `S/ ${Number(p.precio).toFixed(2)}`;
+            document.getElementById('modal-story').textContent = p.story || 'Una historia llena de amor y puntos de crochet...';
+            document.getElementById('adoption-modal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('adoption-modal').classList.add('hidden'); }
+
+        function addToCart() {
+            const notif = document.getElementById('notification');
+            notif.classList.remove('translate-y-32');
+            closeModal();
+            setTimeout(() => notif.classList.add('translate-y-32'), 3000);
+        }
+
+        // ── Filter Buttons ────────────────────────────────────
+        function applyFilter(cat) {
+            activeFilter = cat;
+            document.getElementById('filter-all').className = `px-6 py-2 ${!cat ? 'bg-rosa-salina text-white' : 'bg-white text-slate-400'} rounded-full font-black text-xs uppercase tracking-widest border border-slate-100 shadow-lg transition-all`;
+            document.getElementById('filter-ami').className = `px-6 py-2 ${cat === 'amigurumi' ? 'bg-rosa-salina text-white' : 'bg-white text-slate-400'} rounded-full font-bold text-xs uppercase tracking-widest border border-slate-100 hover:bg-slate-50 transition-all`;
+            document.getElementById('filter-dest').className = `px-6 py-2 ${cat === 'destacado' ? 'bg-rosa-salina text-white' : 'bg-white text-slate-400'} rounded-full font-bold text-xs uppercase tracking-widest border border-slate-100 hover:bg-slate-50 transition-all`;
+            renderProducts(filterData(allProducts, cat));
+        }
+
+        // ── Helpers ───────────────────────────────────────────
+        function showSkeletons() {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = [1, 2, 3, 4].map(() => `<div class="skeleton h-80"></div>`).join('');
+        }
+
+        function clearGrid() {
+            document.getElementById('product-grid').innerHTML = '';
+        }
+
+        function esc(str) {
+            if (!str) return '';
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
+        function navTo(hash) {
+            window.parent.postMessage({ type: 'navigate', hash: hash }, '*');
+        }
+
+        // Listen for external open-product requests (from home page)
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'view-product') {
+                openModal(event.data.id);
+            }
+        });
+
+        // ── Init ──────────────────────────────────────────────
+        fetchProducts();
+    </script>
+</body>
+
+</html>

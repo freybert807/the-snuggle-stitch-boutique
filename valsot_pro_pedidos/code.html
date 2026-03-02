@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>VALSOT PRO — Pedidos Pendientes</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "vs-dark": "#0f1117",
+                        "vs-card": "#1a1f2e",
+                        "vs-border": "#2a2f3e",
+                        "vs-blue": "#3b82f6",
+                        "vs-emerald": "#10b981",
+                        "vs-amber": "#f59e0b",
+                        "vs-red": "#ef4444",
+                        "vs-purple": "#8b5cf6",
+                        "vs-cyan": "#06b6d4",
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: #0f1117;
+            color: #e2e8f0;
+        }
+
+        .glass {
+            background: rgba(26, 31, 46, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .glow-blue {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.25);
+        }
+
+        .glow-emerald {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+        }
+
+        .glow-amber {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+        }
+
+        @keyframes pulseRing {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #1a1f2e 25%, #2a2f3e 50%, #1a1f2e 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        .admin-badge {
+            animation: pulseRing 2s ease-in-out infinite;
+        }
+
+        .row-animate {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        .status-chip {
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            padding: 3px 10px;
+            text-transform: uppercase;
+        }
+
+        .status-pendiente {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-aprobado {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-cancelado {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-procesando {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .table-row:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
+        }
+
+        .btn-emerald {
+            background: linear-gradient(135deg, #10b981, #059669);
+            transition: all 0.2s ease;
+        }
+
+        .btn-emerald:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+        }
+
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            background: #0f1117 !important;
+            border-color: #2a2f3e !important;
+            color: #e2e8f0 !important;
+            border-radius: 0.75rem !important;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f1117;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2a2f3e;
+            border-radius: 10px;
+        }
+
+        .conn-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .conn-dot.ok {
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+        }
+
+        .conn-dot.err {
+            background: #ef4444;
+            box-shadow: 0 0 8px #ef4444;
+        }
+
+        .conn-dot.checking {
+            background: #f59e0b;
+            animation: pulseRing 1s infinite;
+        }
+
+        /* Admin-only fields highlight */
+        .admin-field {
+            border-left: 2px solid #8b5cf6;
+            padding-left: 0.75rem;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen p-4 md:p-6">
+
+    <!-- ===== HEADER ===== -->
+    <header class="max-w-7xl mx-auto mb-6">
+        <div class="glass rounded-2xl p-4 flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-4">
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-vs-blue to-vs-purple flex items-center justify-center glow-blue">
+                    <span class="material-symbols-outlined text-white text-xl">inventory_2</span>
+                </div>
+                <div>
+                    <h1 class="font-black text-lg text-white tracking-tight">VALSOT <span
+                            class="text-vs-blue">PRO</span></h1>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-[0.25em] font-semibold">Pedidos Pendientes ·
+                        Módulo Supabase</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 flex-wrap">
+                <!-- Connection status -->
+                <div id="conn-status"
+                    class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-vs-card border border-vs-border text-xs font-semibold">
+                    <span class="conn-dot checking" id="conn-dot"></span>
+                    <span id="conn-label" class="text-slate-400">Verificando conexión...</span>
+                </div>
+
+                <!-- Admin badge -->
+                <div id="admin-badge"
+                    class="admin-badge hidden items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold"
+                    style="background: rgba(139,92,246,0.15); border-color: rgba(139,92,246,0.4); color: #a78bfa;">
+                    <span class="material-symbols-outlined text-sm">verified_user</span>
+                    Administrador Activo
+                </div>
+
+                <button id="btn-nuevo" onclick="openModal()"
+                    class="btn-primary text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 uppercase tracking-wider">
+                    <span class="material-symbols-outlined text-sm">add</span>
+                    Nuevo Pedido
+                </button>
+
+                <button onclick="fetchPedidos()"
+                    class="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-vs-border text-xs font-bold text-slate-400 hover:text-white hover:border-vs-blue transition-all">
+                    <span class="material-symbols-outlined text-sm">refresh</span>
+                    Actualizar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== STATS BAR ===== -->
+    <div class="max-w-7xl mx-auto mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="glass rounded-xl p-4">
+            <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Total Pedidos</p>
+            <p class="text-2xl font-black text-white" id="stat-total">—</p>
+        </div>
+        <div class="glass rounded-xl p-4">
+            <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Pendientes</p>
+            <p class="text-2xl font-black text-vs-amber" id="stat-pendiente">—</p>
+        </div>
+        <div class="glass rounded-xl p-4">
+            <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Aprobados</p>
+            <p class="text-2xl font-black text-vs-emerald" id="stat-aprobado">—</p>
+        </div>
+        <div class="glass rounded-xl p-4">
+            <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Cancelados</p>
+            <p class="text-2xl font-black text-vs-red" id="stat-cancelado">—</p>
+        </div>
+    </div>
+
+    <!-- ===== MAIN TABLE ===== -->
+    <main class="max-w-7xl mx-auto">
+        <div class="glass rounded-2xl overflow-hidden">
+            <div class="p-4 border-b border-vs-border flex items-center justify-between flex-wrap gap-3">
+                <h2 class="font-bold text-sm text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-vs-blue text-lg">table_rows</span>
+                    Tabla · <span class="font-mono text-vs-blue text-xs">pedidos_pendientes</span>
+                </h2>
+                <div class="flex items-center gap-3">
+                    <input type="text" id="search-input" placeholder="Buscar pedido..." onkeyup="filterTable()"
+                        class="px-3 py-1.5 text-xs w-48 !rounded-lg !bg-vs-dark !border-vs-border placeholder:text-slate-600">
+                    <select id="filter-status" onchange="filterTable()"
+                        class="px-3 py-1.5 text-xs !rounded-lg !bg-vs-dark !border-vs-border">
+                        <option value="">Todos los estados</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Aprobado">Aprobado</option>
+                        <option value="Procesando">Procesando</option>
+                        <option value="Cancelado">Cancelado</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs">
+                    <thead>
+                        <tr class="border-b border-vs-border">
+                            <th
+                                class="text-left px-4 py-3 text-slate-500 uppercase tracking-widest font-semibold whitespace-nowrap">
+                                #ID</th>
+                            <th
+                                class="text-left px-4 py-3 text-slate-500 uppercase tracking-widest font-semibold whitespace-nowrap">
+                                Artículo</th>
+                            <th
+                                class="text-left px-4 py-3 text-slate-500 uppercase tracking-widest font-semibold whitespace-nowrap">
+                                Cantidad</th>
+                            <th class="text-left px-4 py-3 text-slate-500 uppercase tracking-widest font-semibold whitespace-nowrap admin-field"
+                                style="border-left-color: #8b5cf6">Estado <span style="color:#8b5cf6">★</span></th>
+                            <th
+                                class="text-left px-4 py-3 text-slate-500 uppercase tracking-widest font-semibold whitespace-nowrap admin-field">
+                                Distribuidor <span style="color:#8b5cf6">★</span></th>
+                            <th id="th-desc"
+                                class="text-left px-4 py-3 text-slate-500 uppercase tracking-widest font-semibold whitespace-nowrap admin-field hidden">
+                                Descripción <span style="color:#8b5cf6">★</span></th>
+                            <th
+                                class="text-left px-4 py-3 text-slate-500 uppercase tracking-widest font-semibold whitespace-nowrap">
+                                Fecha</th>
+                            <th class="px-4 py-3"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Skeleton loaders -->
+                        <tr class="skeleton-row border-b border-vs-border">
+                            <td class="px-4 py-4">
+                                <div class="skeleton h-3 w-8 rounded"></div>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="skeleton h-3 w-32 rounded"></div>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="skeleton h-3 w-10 rounded"></div>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="skeleton h-4 w-20 rounded-full"></div>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="skeleton h-3 w-28 rounded"></div>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="skeleton h-3 w-24 rounded"></div>
+                            </td>
+                            <td class="px-4 py-4"></td>
+                        </tr>
+                        <tr class="skeleton-row border-b border-vs-border">
+                            <td class="px-4 py-4">
+                                <div class="skeleton h-3 w-8 rounded"></div>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="skeleton h-3 w-40 rounded"></div>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="skeleton h-3 w-10 rounded"></div>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="skeleton h-4 w-20 rounded-full"></div>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="skeleton h-3 w-24 rounded"></div>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="skeleton h-3 w-20 rounded"></div>
+                            </td>
+                            <td class="px-4 py-4"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty state -->
+            <div id="empty-state" class="hidden p-16 text-center">
+                <span class="material-symbols-outlined text-5xl text-slate-700">inbox</span>
+                <p class="text-slate-600 mt-3 font-semibold text-sm">No hay pedidos pendientes</p>
+                <p class="text-slate-700 text-xs mt-1">Crea el primero usando el botón "Nuevo Pedido"</p>
+            </div>
+
+            <!-- Error state -->
+            <div id="error-state" class="hidden p-12 text-center">
+                <span class="material-symbols-outlined text-5xl text-vs-red/50">error</span>
+                <p class="text-vs-red/80 mt-3 font-bold text-sm" id="error-msg">Error de conexión</p>
+                <p class="text-slate-600 text-xs mt-1">Revisa la consola del navegador para más detalles</p>
+                <button onclick="fetchPedidos()"
+                    class="mt-4 px-4 py-2 rounded-xl border border-vs-red/30 text-vs-red text-xs font-bold hover:border-vs-red transition-colors">
+                    Reintentar
+                </button>
+            </div>
+
+            <!-- Footer note -->
+            <div class="p-3 border-t border-vs-border flex items-center gap-2">
+                <span class="text-[10px] text-slate-700">
+                    <span style="color:#8b5cf6">★</span> Campos restringidos — Solo visibles y editables por
+                    Administrador Activo
+                </span>
+            </div>
+        </div>
+
+        <!-- Connection Test Log -->
+        <div class="glass rounded-2xl mt-4 p-4">
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm text-vs-cyan">terminal</span>
+                Log de Conexión Supabase
+            </h3>
+            <div id="conn-log" class="font-mono text-[11px] space-y-1 max-h-36 overflow-y-auto">
+                <p class="text-slate-600">Iniciando módulo VALSOT PRO...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- ===== CREATE/EDIT MODAL ===== -->
+    <div id="modal-overlay" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+        <div class="glass rounded-3xl w-full max-w-lg p-7 border border-vs-border"
+            style="animation: slideIn 0.2s ease-out;">
+            <div class="flex items-center justify-between mb-6">
+                <h3 id="modal-title" class="font-black text-lg text-white">Nuevo Pedido</h3>
+                <button onclick="closeModal()" class="text-slate-600 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <form id="pedido-form" class="space-y-4" onsubmit="submitPedido(event)">
+                <input type="hidden" id="edit-id">
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Artículo *</label>
+                        <input type="text" id="f-articulo" required placeholder="Nombre del artículo"
+                            class="w-full px-4 py-2.5 text-sm">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Cantidad *</label>
+                        <input type="number" id="f-cantidad" required min="1" placeholder="0"
+                            class="w-full px-4 py-2.5 text-sm">
+                    </div>
+                </div>
+
+                <!-- Admin-only fields -->
+                <div id="admin-fields" class="space-y-4 border border-vs-purple/20 rounded-xl p-4 bg-vs-purple/5">
+                    <p class="text-[10px] font-bold text-vs-purple uppercase tracking-widest flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-sm">lock_open</span>
+                        Campos de Administrador
+                    </p>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Estado</label>
+                        <select id="f-estado" class="w-full px-4 py-2.5 text-sm">
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Aprobado">Aprobado</option>
+                            <option value="Procesando">Procesando</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Distribuidor
+                            Sugerido</label>
+                        <input type="text" id="f-distribuidor" placeholder="Nombre del distribuidor"
+                            class="w-full px-4 py-2.5 text-sm">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Descripción /
+                            Notas</label>
+                        <textarea id="f-descripcion" rows="2" placeholder="Observaciones adicionales..."
+                            class="w-full px-4 py-2.5 text-sm resize-none"></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" id="btn-submit"
+                    class="btn-emerald w-full text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 text-sm">
+                    <span class="material-symbols-outlined text-base" id="btn-icon">save</span>
+                    <span id="btn-label">Guardar Pedido en Supabase</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== EDIT STATUS MODAL ===== -->
+    <div id="edit-modal-overlay" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+        <div class="glass rounded-3xl w-full max-w-md p-7 border border-vs-border">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="font-black text-lg text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-vs-purple">edit</span>
+                    Editar Campos Admin
+                </h3>
+                <button onclick="closeEditModal()" class="text-slate-600 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <input type="hidden" id="edit-row-id">
+
+                <div class="space-y-1.5">
+                    <label
+                        class="text-[10px] font-bold uppercase tracking-widest text-slate-500 admin-field">Estado</label>
+                    <select id="edit-estado" class="w-full px-4 py-2.5 text-sm">
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Aprobado">Aprobado</option>
+                        <option value="Procesando">Procesando</option>
+                        <option value="Cancelado">Cancelado</option>
+                    </select>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label
+                        class="text-[10px] font-bold uppercase tracking-widest text-slate-500 admin-field">Distribuidor
+                        Sugerido</label>
+                    <input type="text" id="edit-distribuidor" placeholder="Distribuidor..."
+                        class="w-full px-4 py-2.5 text-sm">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label
+                        class="text-[10px] font-bold uppercase tracking-widest text-slate-500 admin-field">Descripción</label>
+                    <textarea id="edit-descripcion" rows="3" class="w-full px-4 py-2.5 text-sm resize-none"></textarea>
+                </div>
+
+                <button onclick="saveEditModal()"
+                    class="btn-primary w-full text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 text-sm">
+                    <span class="material-symbols-outlined text-base">check_circle</span>
+                    Actualizar en Supabase
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =============================================
+        // VALSOT PRO — Supabase Integration
+        // =============================================
+        const SUPABASE_URL = 'https://inaobamnnfpofjlhpzut.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_AiCHIxut58y_V3jwgocFaw_aLIUlG72';
+        const TABLE = 'pedidos_pendientes';
+
+        // Admin role - Administrador Activo
+        const ADMIN_ROLE = {
+            nombre: 'Administrador Activo',
+            activo: true,
+            camposPermitidos: ['estado', 'descripcion', 'distribuidor_sugerido']
+        };
+
+        let allData = [];
+        let isAdmin = ADMIN_ROLE.activo;
+
+        // ========= SUPABASE API HELPERS =========
+
+        function getHeaders(method = 'GET') {
+            const h = {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+            };
+            if (method !== 'GET') {
+                h['Prefer'] = 'return=representation';
+            }
+            return h;
+        }
+
+        async function supabaseSelect(params = '') {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?${params}&order=created_at.desc`, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || `HTTP ${res.status}`);
+            }
+            return res.json();
+        }
+
+        async function supabaseInsert(data) {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`, {
+                method: 'POST',
+                headers: getHeaders('POST'),
+                body: JSON.stringify(data)
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || `HTTP ${res.status}`);
+            }
+            return res.json();
+        }
+
+        async function supabaseUpdate(id, data) {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`, {
+                method: 'PATCH',
+                headers: getHeaders('PATCH'),
+                body: JSON.stringify(data)
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || `HTTP ${res.status}`);
+            }
+            return res.json();
+        }
+
+        // ========= CONNECTION TEST (FETCH INICIAL) =========
+
+        async function fetchPedidos() {
+            setConnStatus('checking');
+            log('⏳ Iniciando fetch a tabla <b>pedidos_pendientes</b>...');
+            log(`🔗 Endpoint: <span class="text-vs-cyan">${SUPABASE_URL}/rest/v1/${TABLE}</span>`);
+
+            showSkeletons();
+            hideStates();
+
+            try {
+                const data = await supabaseSelect('select=*');
+                allData = data;
+
+                setConnStatus('ok');
+                log(`✅ <span class="text-vs-emerald">Conexión exitosa</span> — ${data.length} registro(s) recibido(s)`);
+                log(`📊 Tabla reconocida con rol: <span class="text-vs-purple">Administrador Activo</span>`);
+
+                renderTable(data);
+                updateStats(data);
+                showAdminBadge();
+
+            } catch (err) {
+                setConnStatus('err');
+                log(`❌ <span class="text-vs-red">Error: ${err.message}</span>`);
+
+                if (err.message.includes('relation') || err.message.includes('does not exist')) {
+                    log(`ℹ️ <span class="text-vs-amber">La tabla <b>${TABLE}</b> no existe aún. Créala en Supabase Dashboard → Table Editor.</span>`);
+                    showError('Tabla "pedidos_pendientes" no encontrada. Créala primero en Supabase Dashboard.');
+                } else {
+                    showError(err.message);
+                }
+
+                clearSkeletons();
+            }
+        }
+
+        // ========= RENDER =========
+
+        function renderTable(data) {
+            const tbody = document.getElementById('table-body');
+            clearSkeletons();
+
+            if (data.length === 0) {
+                tbody.innerHTML = '';
+                document.getElementById('empty-state').classList.remove('hidden');
+                return;
+            }
+
+            // Show description column if admin
+            if (isAdmin) {
+                document.getElementById('th-desc').classList.remove('hidden');
+            }
+
+            tbody.innerHTML = data.map((row, i) => `
+                <tr class="table-row border-b border-vs-border/50 row-animate" style="animation-delay:${i * 0.04}s">
+                    <td class="px-4 py-3 font-mono text-slate-600 text-[11px]">${row.id}</td>
+                    <td class="px-4 py-3 font-semibold text-white">${escHtml(row.articulo || '—')}</td>
+                    <td class="px-4 py-3 text-slate-300">${row.cantidad ?? '—'}</td>
+                    <td class="px-4 py-3">
+                        <span class="status-chip status-${(row.estado || 'pendiente').toLowerCase()}">${escHtml(row.estado || 'Pendiente')}</span>
+                    </td>
+                    <td class="px-4 py-3 text-slate-400">${escHtml(row.distribuidor_sugerido || '—')}</td>
+                    ${isAdmin ? `<td class="px-4 py-3 text-slate-500 max-w-[160px] truncate" title="${escHtml(row.descripcion || '')}">${escHtml(row.descripcion || '—')}</td>` : ''}
+                    <td class="px-4 py-3 text-slate-600 whitespace-nowrap">${formatDate(row.created_at)}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-1">
+                            ${isAdmin ? `
+                            <button onclick="openEditModal(${JSON.stringify(row).replace(/"/g, '&quot;')})"
+                                title="Editar campos admin"
+                                class="p-1.5 rounded-lg text-slate-600 hover:text-vs-purple hover:bg-vs-purple/10 transition-all">
+                                <span class="material-symbols-outlined text-base">edit</span>
+                            </button>` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStats(data) {
+            document.getElementById('stat-total').textContent = data.length;
+            document.getElementById('stat-pendiente').textContent = data.filter(d => (d.estado || 'Pendiente') === 'Pendiente').length;
+            document.getElementById('stat-aprobado').textContent = data.filter(d => d.estado === 'Aprobado').length;
+            document.getElementById('stat-cancelado').textContent = data.filter(d => d.estado === 'Cancelado').length;
+        }
+
+        // ========= INSERT =========
+
+        async function submitPedido(e) {
+            e.preventDefault();
+            const btnLabel = document.getElementById('btn-label');
+            const btnIcon = document.getElementById('btn-icon');
+
+            btnLabel.textContent = 'Guardando...';
+            btnIcon.textContent = 'hourglass_empty';
+
+            const payload = {
+                articulo: document.getElementById('f-articulo').value.trim(),
+                cantidad: parseInt(document.getElementById('f-cantidad').value),
+                estado: document.getElementById('f-estado').value,
+                distribuidor_sugerido: document.getElementById('f-distribuidor').value.trim() || null,
+                descripcion: document.getElementById('f-descripcion').value.trim() || null,
+            };
+
+            const editId = document.getElementById('edit-id').value;
+
+            try {
+                if (editId) {
+                    await supabaseUpdate(editId, payload);
+                    log(`✅ Pedido <b>#${editId}</b> actualizado correctamente.`);
+                } else {
+                    const res = await supabaseInsert(payload);
+                    log(`✅ <span class="text-vs-emerald">INSERT exitoso</span> — Nuevo pedido creado con ID <b>${res[0]?.id ?? '?'}</b>`);
+                }
+                closeModal();
+                await fetchPedidos();
+            } catch (err) {
+                log(`❌ <span class="text-vs-red">Error al guardar: ${err.message}</span>`);
+                alert(`Error al guardar: ${err.message}`);
+            } finally {
+                btnLabel.textContent = 'Guardar Pedido en Supabase';
+                btnIcon.textContent = 'save';
+            }
+        }
+
+        // ========= EDIT MODAL =========
+
+        function openEditModal(row) {
+            document.getElementById('edit-row-id').value = row.id;
+            document.getElementById('edit-estado').value = row.estado || 'Pendiente';
+            document.getElementById('edit-distribuidor').value = row.distribuidor_sugerido || '';
+            document.getElementById('edit-descripcion').value = row.descripcion || '';
+            document.getElementById('edit-modal-overlay').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal-overlay').classList.add('hidden');
+        }
+
+        async function saveEditModal() {
+            const id = document.getElementById('edit-row-id').value;
+            const payload = {
+                estado: document.getElementById('edit-estado').value,
+                distribuidor_sugerido: document.getElementById('edit-distribuidor').value.trim() || null,
+                descripcion: document.getElementById('edit-descripcion').value.trim() || null,
+            };
+            try {
+                await supabaseUpdate(id, payload);
+                log(`✅ Campos admin del pedido <b>#${id}</b> actualizados por <span class="text-vs-purple">Administrador Activo</span>.`);
+                closeEditModal();
+                await fetchPedidos();
+            } catch (err) {
+                log(`❌ <span class="text-vs-red">Error al actualizar: ${err.message}</span>`);
+                alert(`Error: ${err.message}`);
+            }
+        }
+
+        // ========= MODAL HELPERS =========
+
+        function openModal() {
+            document.getElementById('edit-id').value = '';
+            document.getElementById('pedido-form').reset();
+            document.getElementById('modal-title').textContent = 'Nuevo Pedido';
+            document.getElementById('btn-label').textContent = 'Guardar Pedido en Supabase';
+            document.getElementById('modal-overlay').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.add('hidden');
+        }
+
+        // ========= FILTER =========
+
+        function filterTable() {
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-status').value;
+
+            const filtered = allData.filter(row => {
+                const matchSearch = !search ||
+                    (row.articulo || '').toLowerCase().includes(search) ||
+                    (row.distribuidor_sugerido || '').toLowerCase().includes(search) ||
+                    String(row.id).includes(search);
+                const matchStatus = !statusFilter || row.estado === statusFilter;
+                return matchSearch && matchStatus;
+            });
+
+            renderTable(filtered);
+        }
+
+        // ========= UI HELPERS =========
+
+        function setConnStatus(state) {
+            const dot = document.getElementById('conn-dot');
+            const label = document.getElementById('conn-label');
+            dot.className = 'conn-dot';
+            if (state === 'ok') {
+                dot.classList.add('ok');
+                label.textContent = 'Conectado · Supabase';
+                label.className = 'text-vs-emerald';
+            } else if (state === 'err') {
+                dot.classList.add('err');
+                label.textContent = 'Error de conexión';
+                label.className = 'text-vs-red';
+            } else {
+                dot.classList.add('checking');
+                label.textContent = 'Verificando...';
+                label.className = 'text-vs-amber';
+            }
+        }
+
+        function showAdminBadge() {
+            if (isAdmin) {
+                const badge = document.getElementById('admin-badge');
+                badge.classList.remove('hidden');
+                badge.classList.add('flex');
+            }
+        }
+
+        function log(msg) {
+            const logEl = document.getElementById('conn-log');
+            const ts = new Date().toLocaleTimeString('es-PE', { hour12: false });
+            logEl.innerHTML += `<p class="text-slate-500"><span class="text-slate-700">${ts}</span> → ${msg}</p>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function showSkeletons() {
+            const tbody = document.getElementById('table-body');
+            tbody.querySelectorAll('tr:not(.skeleton-row)').forEach(tr => tr.remove());
+            tbody.querySelectorAll('.skeleton-row').forEach(tr => tr.classList.remove('hidden'));
+        }
+
+        function clearSkeletons() {
+            document.getElementById('table-body').querySelectorAll('.skeleton-row').forEach(tr => tr.remove());
+        }
+
+        function hideStates() {
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('error-state').classList.add('hidden');
+        }
+
+        function showError(msg) {
+            clearSkeletons();
+            document.getElementById('error-state').classList.remove('hidden');
+            document.getElementById('error-msg').textContent = msg;
+        }
+
+        function formatDate(iso) {
+            if (!iso) return '—';
+            return new Date(iso).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function escHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // ========= CLOSE ON OVERLAY CLICK =========
+        document.getElementById('modal-overlay').addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+        document.getElementById('edit-modal-overlay').addEventListener('click', function (e) {
+            if (e.target === this) closeEditModal();
+        });
+
+        // ========= INIT =========
+        log(`🚀 VALSOT PRO iniciado — Rol: <span class="text-vs-purple">Administrador Activo</span>`);
+        log(`📌 Proyecto Supabase: <span class="text-vs-cyan">inaobamnnfpofjlhpzut</span>`);
+        log(`🔑 API Key: <span class="text-slate-600">sb_publishable_AiCHIxut58y_V3jwgocFaw_aLIUlG72</span>`);
+        fetchPedidos();
+    </script>
+</body>
+
+</html>

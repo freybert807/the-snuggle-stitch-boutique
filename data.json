@@ -1,0 +1,52 @@
+{
+  "products": [
+    {
+      "id": "stitch-aventurero",
+      "name": "Stitch Aventurero",
+      "price_pen": 85,
+      "description": "Buscando un hogar donde lo quieran mucho y pueda vivir mil aventuras.",
+      "attributes": {
+        "softness": 10,
+        "material": "Algodón orgánico",
+        "size": "25cm"
+      },
+      "image_url": "photo_9.png"
+    },
+    {
+      "id": "snoopy-volador",
+      "name": "Snoopy Volador",
+      "price_pen": 65,
+      "description": "Un amiguito que sueña despierto y está listo para volar a tu lado.",
+      "attributes": {
+        "softness": 9,
+        "material": "Algodón orgánico",
+        "size": "20cm"
+      },
+      "image_url": "photo_0.png"
+    },
+    {
+      "id": "llama-arcoiris",
+      "name": "Llama Arcoíris",
+      "price_pen": 120,
+      "description": "Traída directamente desde los andes con los colores más tiernos.",
+      "attributes": {
+        "softness": 10,
+        "material": "Algodón orgánico",
+        "size": "35cm"
+      },
+      "image_url": "photo_1.png"
+    },
+    {
+      "id": "hippo-sweet",
+      "name": "Hipopótamo Sweet",
+      "price_pen": 55,
+      "description": "El compañero perfecto para las siestas más dulces del mundo.",
+      "attributes": {
+        "softness": 8,
+        "material": "Algodón orgánico",
+        "size": "18cm"
+      },
+      "image_url": "photo_2.png"
+    }
+  ]
+}

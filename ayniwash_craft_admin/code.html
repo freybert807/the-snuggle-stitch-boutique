@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>El Diario de la Artesana - Admin Maestro</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,400&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { "primary": "#f4b0a4", "secondary": "#7b9acc", "accent": "#f9e89d", "warm-bg": "#fff9f2" } } }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: #fff9f2;
+        }
+
+        .font-display {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .crochet-btn {
+            background: #f4b0a4;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .crochet-btn:hover {
+            transform: scale(1.02);
+            filter: brightness(1.02);
+        }
+
+        .dashed-border {
+            border: 3px dashed #f4b0a444;
+        }
+
+        .stitch-preview {
+            border: 3px dashed #f4b0a4;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            background: white;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #f4b0a433;
+            border-radius: 10px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner {
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .toast-in {
+            animation: toastIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body class="p-6">
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <!-- Config generado en build (gitignored) — credenciales seguras -->
+    <script src="../boutique-config.js" onerror="console.info('[Boutique] Usando fallback de credenciales.')"></script>
+
+    <div class="max-w-7xl mx-auto">
+        <header class="flex items-center justify-between mb-12">
+            <div class="flex items-center gap-4">
+                <span class="text-5xl">📔</span>
+                <div>
+                    <h1 class="text-3xl font-black font-display italic text-slate-800">El Diario de la Artesana</h1>
+                    <p class="text-[10px] text-primary font-black uppercase tracking-[0.3em]">Panel de Control Maestro ·
+                        Supabase</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div id="db-status"
+                    class="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full border border-slate-100 text-xs font-semibold text-slate-400 shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span> Conectando...
+                </div>
+                <button onclick="saveGlobalConfig()"
+                    class="bg-secondary text-white px-6 py-2 rounded-full font-black text-xs uppercase tracking-widest shadow-lg hover:scale-105 transition-all">Guardar
+                    Config</button>
+                <button onclick="logout()" class="text-slate-300 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-3xl">logout</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Left -->
+            <div class="lg:col-span-4 space-y-6">
+                <section class="bg-white p-6 rounded-[2.5rem] shadow-xl dashed-border space-y-6">
+                    <h2 class="text-lg font-black text-secondary flex items-center gap-2 uppercase tracking-widest">
+                        <span class="material-symbols-outlined">settings_suggest</span> Configuración de la Web
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black uppercase text-slate-400">Paleta de Colores</label>
+                            <select id="theme-selector"
+                                class="w-full rounded-xl border-slate-100 focus:ring-primary focus:border-primary text-sm font-bold">
+                                <option value="Andean Sunset">Andean Sunset 🌅</option>
+                                <option value="Cusco Pastel">Cusco Pastel 🏔️</option>
+                                <option value="Classic Kawaii">Classic Kawaii 🌸</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black uppercase text-slate-400">Título de Bienvenida</label>
+                            <input type="text" id="home-title-input"
+                                class="w-full rounded-xl border-slate-100 focus:ring-primary focus:border-primary text-sm font-medium"
+                                placeholder="Escribe el título...">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black uppercase text-slate-400">Mensaje de Bienvenida</label>
+                            <textarea id="home-welcome-input"
+                                class="w-full rounded-xl border-slate-100 focus:ring-primary focus:border-primary text-sm h-24 font-medium"
+                                placeholder="Escribe el mensaje..."></textarea>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black uppercase text-slate-400">Compañero del Mes ⭐</label>
+                            <select id="featured-selector"
+                                class="w-full rounded-xl border-slate-100 focus:ring-primary focus:border-primary text-sm font-bold">
+                                <option value="">— Sin destacar —</option>
+                            </select>
+                            <p class="text-[9px] text-slate-400 italic mt-1">Actualiza <code
+                                    class="bg-slate-50 px-1 rounded">es_companero_mes</code> en Supabase</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="bg-white p-6 rounded-[2.5rem] shadow-lg border-2 border-dashed border-accent/20">
+                    <h2 class="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2 uppercase tracking-widest">
+                        <span class="material-symbols-outlined text-accent">confirmation_number</span> Cupones Mágicos
+                    </h2>
+                    <form id="coupon-form" class="flex gap-2 mb-4">
+                        <input type="text" id="coupon-code" placeholder="CÓDIGO"
+                            class="flex-1 rounded-xl border-slate-50 text-xs uppercase font-black" required>
+                        <input type="number" id="coupon-pct" placeholder="%"
+                            class="w-16 rounded-xl border-slate-50 text-xs font-bold" required>
+                        <button type="submit"
+                            class="bg-accent/20 p-2 rounded-xl text-slate-600 hover:bg-accent/40 transition-colors">
+                            <span class="material-symbols-outlined">add</span>
+                        </button>
+                    </form>
+                    <div id="coupon-list" class="space-y-2 max-h-40 overflow-y-auto pr-1"></div>
+                </section>
+            </div>
+
+            <!-- Right: Catalog -->
+            <div class="lg:col-span-8 space-y-8">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-black font-display italic text-slate-800">Gestión de Amiguitos</h2>
+                    <button onclick="showAddForm()"
+                        class="bg-primary text-white px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-105 transition-all">+
+                        Nuevo Compañero</button>
+                </div>
+
+                <div id="catalog-loading" class="flex items-center justify-center py-16">
+                    <span class="material-symbols-outlined text-4xl text-primary spinner">progress_activity</span>
+                </div>
+                <div id="catalog-list" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                <div id="catalog-empty" class="hidden text-center py-16">
+                    <div class="text-6xl mb-4">🧶</div>
+                    <p class="text-slate-400 font-medium italic">¡Crea tu primer amiguito!</p>
+                </div>
+
+                <!-- Modal -->
+                <div id="edit-modal"
+                    class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div class="bg-white w-full max-w-lg rounded-[3rem] p-8 shadow-2xl relative">
+                        <button onclick="closeModal()"
+                            class="absolute top-6 right-6 text-slate-300 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-3xl">close</span>
+                        </button>
+                        <form id="amigurumi-form" class="space-y-4" onsubmit="submitAmigurumi(event)">
+                            <h2 id="modal-title" class="text-2xl font-black font-display text-slate-800 italic mb-6">
+                                Nuevo Compañero</h2>
+                            <div class="grid grid-cols-2 gap-6">
+                                <div id="preview-container"
+                                    class="stitch-preview aspect-square w-full flex items-center justify-center relative cursor-pointer">
+                                    <img id="image-preview" src="" class="hidden w-full h-full object-cover">
+                                    <div id="preview-placeholder" class="text-center p-4">
+                                        <span
+                                            class="material-symbols-outlined text-4xl text-primary opacity-40">add_a_photo</span>
+                                        <p class="text-[9px] font-black text-primary mt-2 uppercase">Subir Foto</p>
+                                    </div>
+                                    <input type="file" id="file-input" accept="image/*"
+                                        class="absolute inset-0 opacity-0 cursor-pointer">
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="space-y-1">
+                                        <label
+                                            class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Nombre
+                                            *</label>
+                                        <input type="text" id="f-nombre" required
+                                            class="w-full rounded-xl border-slate-100 focus:ring-primary focus:border-primary text-sm font-bold">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label
+                                            class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Precio
+                                            (S/) *</label>
+                                        <input type="number" id="f-precio" required min="0" step="0.01"
+                                            class="w-full rounded-xl border-slate-100 focus:ring-primary focus:border-primary text-sm font-bold">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label
+                                            class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Categoría</label>
+                                        <select id="f-categoria"
+                                            class="w-full rounded-xl border-slate-100 focus:ring-primary focus:border-primary text-sm font-bold">
+                                            <option value="amigurumi">Amigurumi</option>
+                                            <option value="accesorio">Accesorio</option>
+                                            <option value="especial">Especial</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Historia
+                                    Mágica</label>
+                                <textarea id="f-story" required rows="4"
+                                    class="w-full rounded-xl border-slate-100 focus:ring-primary focus:border-primary text-sm font-medium"></textarea>
+                            </div>
+                            <button type="submit" id="submit-btn"
+                                class="w-full crochet-btn text-white font-black py-5 rounded-2xl shadow-xl shadow-pink-100 text-sm uppercase tracking-widest mt-4 flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined" id="submit-icon">auto_fix_high</span>
+                                <span id="submit-label">Publicar en el Diario</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast"
+        class="hidden fixed bottom-8 right-8 bg-slate-800 text-white px-6 py-4 rounded-2xl shadow-2xl font-bold text-sm z-50">
+    </div>
+
+    <script>
+        // ── Supabase Init (credentials from boutique-config.js or fallback) ──
+        const { createClient } = window.supabase;
+        const _cfg = window.BOUTIQUE_CONFIG || {};
+        const db = createClient(
+            _cfg.supabaseUrl || 'https://inaobamnnfpofjlhpzut.supabase.co',
+            _cfg.supabaseKey || 'sb_publishable_AiCHIxut58y_V3jwgocFaw_aLIUlG72'
+        );
+
+        let editingId = null;
+        let currentBase64 = '';
+
+        function setDbStatus(ok) {
+            const el = document.getElementById('db-status');
+            el.innerHTML = ok
+                ? `<span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span> Supabase OK`
+                : `<span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span> Sin conexión`;
+        }
+
+        function showToast(msg, type = 'ok') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `fixed bottom-8 right-8 px-6 py-4 rounded-2xl shadow-2xl font-bold text-sm z-50 toast-in ${type === 'ok' ? 'bg-slate-800 text-white' : 'bg-red-500 text-white'}`;
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 3500);
+        }
+
+        async function fetchCatalog() {
+            document.getElementById('catalog-loading').classList.remove('hidden');
+            document.getElementById('catalog-list').classList.add('hidden');
+            document.getElementById('catalog-empty').classList.add('hidden');
+
+            const { data, error } = await db.from('amigurumis').select('id,nombre,precio,img_base64,es_companero_mes,categoria').order('created_at', { ascending: false });
+            document.getElementById('catalog-loading').classList.add('hidden');
+
+            if (error) { setDbStatus(false); showToast('❌ Error al conectar con Supabase', 'err'); return; }
+            setDbStatus(true);
+            const products = data || [];
+            renderCatalog(products);
+            populateFeaturedSelector(products);
+            loadConfig();
+        }
+
+        function renderCatalog(products) {
+            const list = document.getElementById('catalog-list');
+            if (!products.length) { document.getElementById('catalog-empty').classList.remove('hidden'); return; }
+            list.classList.remove('hidden'); list.classList.add('grid');
+            list.innerHTML = products.map(p => `
+                <div class="bg-white p-4 rounded-[2.5rem] shadow-md border border-slate-50 relative group hover:shadow-2xl overflow-hidden transition-all">
+                    ${p.es_companero_mes ? '<div class="absolute top-4 right-4 text-lg z-10">⭐</div>' : ''}
+                    <div class="aspect-square rounded-3xl overflow-hidden mb-4 bg-slate-50">
+                        <img src="${p.img_base64 || ''}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-4xl\'>🧶</div>'">
+                    </div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-slate-800 line-clamp-1 text-sm">${esc(p.nombre)}</h3>
+                            <p class="text-[10px] text-primary font-black mt-1 uppercase">S/ ${Number(p.precio).toFixed(2)}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="editAmigurumi(${p.id})" class="text-slate-300 hover:text-secondary"><span class="material-symbols-outlined text-lg">edit</span></button>
+                            <button onclick="deleteAmigurumi(${p.id})" class="text-slate-300 hover:text-red-400"><span class="material-symbols-outlined text-lg">delete</span></button>
+                        </div>
+                    </div>
+                </div>`).join('');
+        }
+
+        async function submitAmigurumi(e) {
+            e.preventDefault();
+            setSubmitting(true);
+            const payload = {
+                nombre: document.getElementById('f-nombre').value.trim(),
+                precio: parseFloat(document.getElementById('f-precio').value),
+                story: document.getElementById('f-story').value.trim(),
+                categoria: document.getElementById('f-categoria').value,
+            };
+            if (currentBase64) payload.img_base64 = currentBase64;
+            const { error } = editingId
+                ? await db.from('amigurumis').update(payload).eq('id', editingId)
+                : await db.from('amigurumis').insert(payload);
+            setSubmitting(false);
+            if (error) { showToast('❌ ' + error.message, 'err'); return; }
+            showToast(editingId ? '✨ ¡Actualizado!' : '✨ ¡Publicado en el Diario!');
+            closeModal(); fetchCatalog();
+        }
+
+        async function deleteAmigurumi(id) {
+            if (!confirm('¿Borrar este amiguito del diario? 🧶')) return;
+            const { error } = await db.from('amigurumis').delete().eq('id', id);
+            if (error) { showToast('❌ No se pudo borrar', 'err'); return; }
+            showToast('🗑️ Borrado del diario');
+            fetchCatalog();
+        }
+
+        async function editAmigurumi(id) {
+            const { data, error } = await db.from('amigurumis').select('*').eq('id', id).single();
+            if (error || !data) { showToast('❌ Error al cargar', 'err'); return; }
+            editingId = id;
+            document.getElementById('f-nombre').value = data.nombre;
+            document.getElementById('f-precio').value = data.precio;
+            document.getElementById('f-story').value = data.story || '';
+            document.getElementById('f-categoria').value = data.categoria || 'amigurumi';
+            if (data.img_base64) {
+                currentBase64 = data.img_base64;
+                document.getElementById('image-preview').src = data.img_base64;
+                document.getElementById('image-preview').classList.remove('hidden');
+                document.getElementById('preview-placeholder').classList.add('hidden');
+            } else { currentBase64 = ''; }
+            document.getElementById('modal-title').textContent = 'Editando Amiguito';
+            document.getElementById('edit-modal').classList.remove('hidden');
+        }
+
+        function populateFeaturedSelector(products) {
+            const current = products.find(p => p.es_companero_mes);
+            document.getElementById('featured-selector').innerHTML =
+                `<option value="">— Sin destacar —</option>` +
+                products.map(p => `<option value="${p.id}" ${p.id == current?.id ? 'selected' : ''}>${esc(p.nombre)}</option>`).join('');
+        }
+
+        async function saveGlobalConfig() {
+            const config = {
+                activeTheme: document.getElementById('theme-selector').value,
+                homeTitle: document.getElementById('home-title-input').value,
+                homeWelcome: document.getElementById('home-welcome-input').value,
+            };
+            localStorage.setItem('boutique_config', JSON.stringify(config));
+            window.dispatchEvent(new Event('storage'));
+            const selectedId = document.getElementById('featured-selector').value;
+            await db.from('amigurumis').update({ es_companero_mes: false }).neq('id', 0);
+            if (selectedId) await db.from('amigurumis').update({ es_companero_mes: true }).eq('id', selectedId);
+            showToast('✨ ¡Configuración guardada!');
+            fetchCatalog();
+        }
+
+        function loadConfig() {
+            const config = JSON.parse(localStorage.getItem('boutique_config') || '{}');
+            document.getElementById('theme-selector').value = config.activeTheme || 'Andean Sunset';
+            document.getElementById('home-title-input').value = config.homeTitle || '';
+            document.getElementById('home-welcome-input').value = config.homeWelcome || '';
+        }
+
+        function showAddForm() {
+            editingId = null; currentBase64 = '';
+            document.getElementById('amigurumi-form').reset();
+            document.getElementById('image-preview').classList.add('hidden');
+            document.getElementById('preview-placeholder').classList.remove('hidden');
+            document.getElementById('modal-title').textContent = 'Nuevo Compañero';
+            document.getElementById('edit-modal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('edit-modal').classList.add('hidden'); }
+
+        function setSubmitting(loading) {
+            document.getElementById('submit-label').textContent = loading ? 'Publicando...' : 'Publicar en el Diario';
+            document.getElementById('submit-icon').textContent = loading ? 'hourglass_empty' : 'auto_fix_high';
+        }
+
+        document.getElementById('file-input').addEventListener('change', (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                currentBase64 = ev.target.result;
+                document.getElementById('image-preview').src = currentBase64;
+                document.getElementById('image-preview').classList.remove('hidden');
+                document.getElementById('preview-placeholder').classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function renderCoupons() {
+            const coupons = JSON.parse(localStorage.getItem('boutique_coupons') || '{"CUSCOTEN":0.1}');
+            document.getElementById('coupon-list').innerHTML = Object.entries(coupons).map(([code, pct]) => `
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                    <span class="font-black text-xs uppercase text-slate-500">${code} (${Math.round(pct * 100)}%)</span>
+                    <button onclick="deleteCoupon('${code}')" class="text-slate-300 hover:text-red-400"><span class="material-symbols-outlined text-sm">close</span></button>
+                </div>`).join('');
+        }
+
+        document.getElementById('coupon-form').onsubmit = (e) => {
+            e.preventDefault();
+            const code = document.getElementById('coupon-code').value.trim().toUpperCase();
+            const pct = parseFloat(document.getElementById('coupon-pct').value) / 100;
+            const coupons = JSON.parse(localStorage.getItem('boutique_coupons') || '{}');
+            coupons[code] = pct;
+            localStorage.setItem('boutique_coupons', JSON.stringify(coupons));
+            renderCoupons(); e.target.reset();
+        };
+
+        function deleteCoupon(c) {
+            const coupons = JSON.parse(localStorage.getItem('boutique_coupons') || '{}');
+            delete coupons[c];
+            localStorage.setItem('boutique_coupons', JSON.stringify(coupons));
+            renderCoupons();
+        }
+
+        function esc(str) {
+            if (!str) return '';
+            const d = document.createElement('div'); d.textContent = str; return d.innerHTML;
+        }
+
+        function logout() { window.parent.postMessage({ type: 'navigate', hash: '#home' }, '*'); }
+
+        fetchCatalog();
+        renderCoupons();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Snuggle Stitch Boutique — Amigurumis hechos con amor desde Cusco</title>
+    <meta name="description"
+        content="Amigurumis tejidos a mano con lana andina y mucho Munay. Adopta a tu compañero tejido desde Cusco, Perú.">
+
+    <!-- Open Graph (WhatsApp, Facebook, LinkedIn) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="The Snuggle Stitch Boutique 🧶">
+    <meta property="og:description"
+        content="Amigurumis tejidos a mano con lana andina y mucho Munay. Adopta a tu compañero desde Cusco, Perú.">
+    <meta property="og:image" content="/og-preview.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="es_PE">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="The Snuggle Stitch Boutique 🧶">
+    <meta name="twitter:description" content="Amigurumis tejidos a mano con lana andina y mucho Munay.">
+    <meta name="twitter:image" content="/og-preview.png">
+    <link rel="stylesheet" href="style.css">
+    <!-- Andean Sunset Typography -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="logo-container" onclick="navigate('#home')">
+            <div class="yarn-logo">🧶</div>
+            <h1 class="font-display">The Snuggle Stitch Boutique</h1>
+        </div>
+        <nav class="top-nav">
+            <a href="#home" class="nav-item active"><span class="material-symbols-outlined">home</span> El Hogar</a>
+            <a href="#shop" class="nav-item"><span class="material-symbols-outlined">shopping_basket</span> Mercadito
+                Munay</a>
+            <a href="#workshop" class="nav-item"><span class="material-symbols-outlined">auto_fix_high</span> Taller
+                Ayni</a>
+            <a href="#cart" class="nav-item"><span class="material-symbols-outlined">shopping_bag</span> Cestita</a>
+        </nav>
+    </header>
+
+    <main class="app-container">
+        <iframe id="content-frame" class="content-frame" src="ayniwash_craft_home/code.html"></iframe>
+    </main>
+
+    <script>
+        const iframe = document.getElementById('content-frame');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        const routes = {
+            '#home': 'ayniwash_craft_home/code.html',
+            '#shop': 'ayniwash_craft_shop/code.html',
+            '#workshop': 'the_magic_workshop_taller/code.html',
+            '#orders': 'ayniwash_craft_home/code.html#album',
+            '#cart': 'ayniwash_craft_checkout/code.html',
+            '#profile': 'ayniwash_craft_profile/code.html',
+            '#admin-secret-stitch': 'ayniwash_craft_admin/code.html',
+            '#valsot-pro': 'valsot_pro_pedidos/code.html'
+        };
+
+        // Initialize Global Configuration if empty
+        if (!localStorage.getItem('boutique_config')) {
+            localStorage.setItem('boutique_config', JSON.stringify({
+                activeTheme: 'Andean Sunset',
+                featuredProductId: 1, // Stitch
+                homeTitle: 'Un hilito de ternura, un compañero para siempre.',
+                homeWelcome: 'Bienvenidos a nuestro rincón de abrazos tejidos. Aquí, cada amigurumi nace de un deseo de acompañarte en tus mejores historias.'
+            }));
+        }
+
+        function checkMagicWord(hash) {
+            if (hash === '#admin-secret-stitch') {
+                const word = prompt("✨ Introduce la Palabra Mágica para entrar al Diario de la Artesana:");
+                if (word !== 'moncada') {
+                    alert("🧶 ¡Ups! Esa no es la palabra correcta. Sigue tejiendo...");
+                    window.location.hash = '#home';
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function navigate(hash) {
+            if (!checkMagicWord(hash)) return;
+            const url = routes[hash] || routes['#home'];
+
+            iframe.classList.add('fade-out');
+
+            setTimeout(() => {
+                iframe.src = url;
+
+                navItems.forEach(item => {
+                    if (item.getAttribute('href') === hash) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+
+                iframe.onload = () => {
+                    iframe.classList.remove('fade-out');
+                };
+            }, 300);
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const hash = item.getAttribute('href');
+                window.location.hash = hash;
+                navigate(hash);
+            });
+        });
+
+        if (window.location.hash) {
+            navigate(window.location.hash);
+        }
+
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'navigate') {
+                window.location.hash = event.data.hash;
+                navigate(event.data.hash);
+            }
+        });
+    </script>
+</body>
+
+</html>

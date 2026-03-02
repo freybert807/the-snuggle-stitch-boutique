@@ -1,0 +1,19 @@
+{
+  "name": "snuggle-stitch-boutique",
+  "version": "1.0.0",
+  "description": "The Snuggle Stitch Boutique — Amigurumis tejidos con amor desde Cusco, Perú",
+  "scripts": {
+    "build": "node vercel-build.js",
+    "dev": "npx serve . --listen 5173",
+    "preview": "npx serve ."
+  },
+  "keywords": [
+    "amigurumi",
+    "crochet",
+    "boutique",
+    "cusco"
+  ],
+  "author": "freybert807",
+  "license": "ISC",
+  "type": "commonjs"
+}
