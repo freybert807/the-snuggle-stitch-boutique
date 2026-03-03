@@ -252,6 +252,18 @@
             }
 
             allProducts = data || [];
+            allProducts.unshift({
+                id: 'burrito-cienciano',
+                nombre: 'Burrito Cienciano',
+                precio: 55.00,
+                old_price: 65.00,
+                descripcion: 'Un valiente y tierno burrito amigurumi vistiendo la gloriosa camiseta roja. Ideal para los hinchas enamorados del equipo y con mucho Munay.',
+                img_base64: 'img/burrito.jpg',
+                is_new: true,
+                categoria: 'destacado',
+                es_companero_mes: true,
+                atributos: { softness: 10, material: 'Lana andina y algodón', size: '25cm' }
+            });
             renderProducts(filterData(allProducts, activeFilter));
         }
 
