@@ -43,7 +43,12 @@
                 Munay</a>
             <a href="#workshop" class="nav-item"><span class="material-symbols-outlined">auto_fix_high</span> Taller
                 Ayni</a>
-            <a href="#cart" class="nav-item"><span class="material-symbols-outlined">shopping_bag</span> Cestita</a>
+            <a href="#cart" class="nav-item relative">
+                <span class="material-symbols-outlined">shopping_bag</span>
+                <span id="cart-badge"
+                    class="absolute -top-1 -right-2 bg-rosa-salina text-white text-[10px] font-black h-4 w-4 rounded-full flex items-center justify-center shadow-sm hidden z-10">0</span>
+                Cestita
+            </a>
         </nav>
     </header>
 
@@ -77,14 +82,8 @@
         }
 
         function checkMagicWord(hash) {
-            if (hash === '#admin-secret-stitch') {
-                const word = prompt("✨ Introduce la Palabra Mágica para entrar al Diario de la Artesana:");
-                if (word !== 'moncada') {
-                    alert("🧶 ¡Ups! Esa no es la palabra correcta. Sigue tejiendo...");
-                    window.location.hash = '#home';
-                    return false;
-                }
-            }
+            // La validación se hace visualmente en la Cestita (código 'moncada').
+            // Se elimina el prompt() porque navegadores móviles lo bloquean.
             return true;
         }
 
@@ -124,12 +123,54 @@
             navigate(window.location.hash);
         }
 
+        // ── Global Cart Logic (Context Style) ────────────────────────────────────
+        window.cart = [];
+        try {
+            window.cart = JSON.parse(localStorage.getItem('boutique_cart') || '[]');
+            if (!Array.isArray(window.cart)) window.cart = [];
+        } catch (e) { window.cart = []; }
+
+        window.setCart = function (newCart) {
+            window.cart = newCart;
+            localStorage.setItem('boutique_cart', JSON.stringify(window.cart));
+
+            // Update badge in Navbar (using cart.length as requested)
+            const badge = document.getElementById('cart-badge');
+            if (window.cart.length > 0) {
+                badge.textContent = window.cart.length;
+                badge.classList.remove('hidden');
+                badge.classList.add('flex');
+            } else {
+                badge.classList.add('hidden');
+                badge.classList.remove('flex');
+            }
+
+            // Sync with checkout iframe if active
+            const iframe = document.getElementById('content-frame');
+            if (iframe && iframe.contentWindow && iframe.contentWindow.renderCart) {
+                iframe.contentWindow.renderCart();
+            }
+        };
+
         window.addEventListener('message', (event) => {
             if (event.data.type === 'navigate') {
                 window.location.hash = event.data.hash;
                 navigate(event.data.hash);
+            } else if (event.data.type === 'cart-updated') {
+                if (event.data.payload) {
+                    window.setCart(event.data.payload);
+                } else {
+                    try {
+                        let localCart = JSON.parse(localStorage.getItem('boutique_cart') || '[]');
+                        if (!Array.isArray(localCart)) localCart = [];
+                        window.setCart(localCart);
+                    } catch (e) { }
+                }
             }
         });
+
+        // Init badge on load
+        window.setCart(window.cart);
     </script>
 </body>
 

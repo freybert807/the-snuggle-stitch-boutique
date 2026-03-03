@@ -37,6 +37,18 @@
       "image_url": "photo_1.png"
     },
     {
+      "id": "silvestre-cazador",
+      "name": "Silvestre el Cazador",
+      "price_pen": 75,
+      "description": "Toda su vida persiguió al mismo pajarito… y nunca lo atrapó. Pero eso no lo detiene. Silvestre sigue ahí, con su nariz roja, su pechera blanca y su eterno optimismo de que 'esta vez sí'. Ahora puede ser tuyo, y prometemos que no mordisqueará nada que no quieras. Tejido a mano, puntada a puntada, con todo el amor de The Snuggle Stitch Boutique.",
+      "attributes": {
+        "softness": 9,
+        "material": "Algodón orgánico",
+        "size": "22cm"
+      },
+      "image_url": "photo_silvestre.png"
+    },
+    {
       "id": "hippo-sweet",
       "name": "Hipopótamo Sweet",
       "price_pen": 55,

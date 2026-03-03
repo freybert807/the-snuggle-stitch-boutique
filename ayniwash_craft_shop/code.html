@@ -110,9 +110,26 @@
     <script src="../boutique-config.js"
         onerror="console.info('[Boutique] boutique-config.js no encontrado, usando fallback.')"></script>
 
+    <!-- Hero Background Banner (configured by admin) -->
+    <div id="hero-banner" class="hidden w-full rounded-[2.5rem] overflow-hidden mb-10 relative" style="height:220px">
+        <img id="hero-banner-img" src="" class="w-full h-full object-cover" alt="">
+        <div
+            class="absolute inset-0 bg-gradient-to-r from-slate-900/60 via-slate-900/30 to-transparent flex items-center px-10">
+            <div class="space-y-2">
+                <div
+                    class="inline-block px-4 py-1 bg-white/20 backdrop-blur text-white rounded-full text-[10px] font-black uppercase tracking-[0.2em]">
+                    Seleccionado con Munay</div>
+                <h1 class="font-display text-4xl md:text-5xl font-black italic text-white drop-shadow-lg">Mercadito
+                    Munay</h1>
+                <p class="text-white/80 font-medium italic text-sm">Encuentra al compañero que teja tu próxima historia.
+                </p>
+            </div>
+        </div>
+    </div>
+
     <div class="max-w-7xl mx-auto">
-        <!-- Shop Header -->
-        <header class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <!-- Shop Header (shown only when no hero bg) -->
+        <header id="shop-header-default" class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div class="space-y-2">
                 <div
                     class="inline-block px-4 py-1 bg-rosa-salina/10 text-rosa-salina rounded-full text-[10px] font-black uppercase tracking-[0.2em]">
@@ -255,7 +272,7 @@
             }
 
             grid.innerHTML = products.map((p, i) => `
-                <div onclick="openModal(${p.id})"
+                <div onclick="openModal('${p.id}')"
                     class="card-in bg-white p-4 rounded-[2.5rem] soft-shadow border border-white/50 group cursor-pointer hover:-translate-y-2 transition-all"
                     style="animation-delay:${i * 0.06}s">
                     <div class="aspect-square rounded-3xl overflow-hidden mb-6 bg-crema-lana relative">
@@ -276,20 +293,65 @@
             `).join('');
         }
 
+        let currentProduct = null;
+
         // ── Modal ─────────────────────────────────────────────
         function openModal(id) {
-            const p = allProducts.find(prod => prod.id == id);
-            if (!p) return;
-            document.getElementById('modal-img').src = p.img_base64 || '';
-            document.getElementById('modal-name').textContent = p.nombre;
-            document.getElementById('modal-price').textContent = `S/ ${Number(p.precio).toFixed(2)}`;
-            document.getElementById('modal-story').textContent = p.story || 'Una historia llena de amor y puntos de crochet...';
+            currentProduct = allProducts.find(prod => prod.id == id);
+            if (!currentProduct) return;
+            document.getElementById('modal-img').src = currentProduct.img_base64 || '';
+            document.getElementById('modal-name').textContent = currentProduct.nombre;
+            document.getElementById('modal-price').textContent = `S/ ${Number(currentProduct.precio).toFixed(2)}`;
+            document.getElementById('modal-story').textContent = currentProduct.story || 'Una historia llena de amor y puntos de crochet...';
             document.getElementById('adoption-modal').classList.remove('hidden');
         }
 
-        function closeModal() { document.getElementById('adoption-modal').classList.add('hidden'); }
+        function closeModal() {
+            document.getElementById('adoption-modal').classList.add('hidden');
+            currentProduct = null;
+        }
 
         function addToCart() {
+            if (!currentProduct) return;
+
+            let pushedToParent = false;
+            // Strict instructions: try to push to the central cart array
+            try {
+                if (window.parent && window.parent.cart && window.parent.setCart) {
+                    // Determine if it already exists to increment quantity, otherwise push
+                    const existing = window.parent.cart.find(i => String(i.id) === String(currentProduct.id));
+                    if (existing) {
+                        existing.quantity += 1;
+                    } else {
+                        window.parent.cart.push({ ...currentProduct, quantity: 1 });
+                    }
+                    // Call centralized state function
+                    window.parent.setCart(window.parent.cart);
+                    pushedToParent = true;
+                }
+            } catch (e) { } // CORS Blocked
+
+            if (!pushedToParent) {
+                // Fallback for isolated view access or CORS restriction
+                let cart = [];
+                try {
+                    cart = JSON.parse(localStorage.getItem('boutique_cart') || '[]');
+                    if (!Array.isArray(cart)) cart = [];
+                } catch (e) { cart = []; }
+                const existing = cart.find(i => String(i.id) === String(currentProduct.id));
+                if (existing) {
+                    existing.quantity += 1;
+                } else {
+                    cart.push({ ...currentProduct, quantity: 1 });
+                }
+                localStorage.setItem('boutique_cart', JSON.stringify(cart));
+
+                // Fallback sync message
+                try {
+                    window.parent.postMessage({ type: 'cart-updated', payload: cart }, '*');
+                } catch (e) { }
+            }
+
             const notif = document.getElementById('notification');
             notif.classList.remove('translate-y-32');
             closeModal();
@@ -334,6 +396,24 @@
         });
 
         // ── Init ──────────────────────────────────────────────
+
+        // Hero Background from Admin
+        function applyHeroBg() {
+            var heroBg = localStorage.getItem("boutique_hero_bg") || "";
+            var banner = document.getElementById("hero-banner");
+            var defHdr = document.getElementById("shop-header-default");
+            if (heroBg) {
+                document.getElementById("hero-banner-img").src = heroBg;
+                banner.classList.remove("hidden");
+                if (defHdr) defHdr.classList.add("hidden");
+            } else {
+                banner.classList.add("hidden");
+                if (defHdr) defHdr.classList.remove("hidden");
+            }
+        }
+
+        // Init
+        applyHeroBg();
         fetchProducts();
     </script>
 </body>

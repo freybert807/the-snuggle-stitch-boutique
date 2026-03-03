@@ -142,7 +142,20 @@
                                 class="w-full rounded-xl border-slate-100 focus:ring-primary focus:border-primary text-sm h-24 font-medium"
                                 placeholder="Escribe el mensaje..."></textarea>
                         </div>
+                        <!-- Checkout configuration -->
+                        <div class="space-y-1 pt-4 mt-4 border-t border-slate-100">
+                            <label class="text-[10px] font-black uppercase text-secondary">Mensaje de la Cestita</label>
+                            <textarea id="checkout-msg-input"
+                                class="w-full rounded-xl border-slate-100 focus:ring-primary focus:border-primary text-sm h-16 font-medium italic"
+                                placeholder='"Casi listos para llegar a su nueva Pacha"'></textarea>
+                        </div>
                         <div class="space-y-1">
+                            <label class="text-[10px] font-black uppercase text-secondary">Costo de Envío (S/)</label>
+                            <input type="number" id="shipping-cost-input" step="0.5" min="0"
+                                class="w-full rounded-xl border-slate-100 focus:ring-primary focus:border-primary text-sm font-bold"
+                                placeholder="0 para envío gratis">
+                        </div>
+                        <div class="space-y-1 pt-4 border-t border-slate-100">
                             <label class="text-[10px] font-black uppercase text-slate-400">Compañero del Mes ⭐</label>
                             <select id="featured-selector"
                                 class="w-full rounded-xl border-slate-100 focus:ring-primary focus:border-primary text-sm font-bold">
@@ -152,6 +165,37 @@
                                     class="bg-slate-50 px-1 rounded">es_companero_mes</code> en Supabase</p>
                         </div>
                     </div>
+                </section>
+
+                <!-- ── Hero Background Section ────────────────────────── -->
+                <section class="bg-white p-6 rounded-[2.5rem] shadow-xl border-2 border-dashed border-primary/20">
+                    <h2 class="text-lg font-black text-primary flex items-center gap-2 uppercase tracking-widest mb-4">
+                        <span class="material-symbols-outlined">imagesmode</span> Fondo del Mercadito
+                    </h2>
+                    <div id="hero-preview-wrap"
+                        class="relative w-full rounded-2xl overflow-hidden mb-4 bg-slate-50 border-2 border-dashed border-primary/20"
+                        style="aspect-ratio:16/7">
+                        <img id="hero-preview-img" src="" class="hidden w-full h-full object-cover" alt="Fondo actual">
+                        <div id="hero-placeholder"
+                            class="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-4xl text-primary/30">add_photo_alternate</span>
+                            <p class="text-[9px] font-black uppercase tracking-widest text-primary/40">Sin imagen de
+                                fondo</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <label for="hero-file-input"
+                            class="flex-1 cursor-pointer bg-primary/10 hover:bg-primary/20 text-primary font-black text-xs uppercase tracking-widest rounded-2xl py-3 flex items-center justify-center gap-2 transition-all">
+                            <span class="material-symbols-outlined text-sm">upload</span> Subir Foto
+                            <input type="file" id="hero-file-input" accept="image/*" class="hidden">
+                        </label>
+                        <button onclick="clearHeroBg()" id="hero-clear-btn"
+                            class="hidden bg-red-50 hover:bg-red-100 text-red-400 font-black text-xs uppercase tracking-widest rounded-2xl px-4 py-3 transition-all">
+                            <span class="material-symbols-outlined text-sm">delete</span>
+                        </button>
+                    </div>
+                    <p class="text-[9px] text-slate-300 mt-3 italic">Se muestra como fondo en la cabecera del Mercadito
+                        Munay.</p>
                 </section>
 
                 <section class="bg-white p-6 rounded-[2.5rem] shadow-lg border-2 border-dashed border-accent/20">
@@ -385,6 +429,8 @@
                 activeTheme: document.getElementById('theme-selector').value,
                 homeTitle: document.getElementById('home-title-input').value,
                 homeWelcome: document.getElementById('home-welcome-input').value,
+                checkoutMessage: document.getElementById('checkout-msg-input').value,
+                shippingCost: parseFloat(document.getElementById('shipping-cost-input').value) || 0,
             };
             localStorage.setItem('boutique_config', JSON.stringify(config));
             window.dispatchEvent(new Event('storage'));
@@ -400,6 +446,59 @@
             document.getElementById('theme-selector').value = config.activeTheme || 'Andean Sunset';
             document.getElementById('home-title-input').value = config.homeTitle || '';
             document.getElementById('home-welcome-input').value = config.homeWelcome || '';
+            document.getElementById('checkout-msg-input').value = config.checkoutMessage || '"Casi listos para llegar a su nueva Pacha"';
+            document.getElementById('shipping-cost-input').value = config.shippingCost || 0;
+            // Load hero bg preview
+            const heroBg = localStorage.getItem('boutique_hero_bg') || '';
+            applyHeroPreview(heroBg);
+        }
+
+        // ── Hero Background ──────────────────────────────────────
+        document.getElementById('hero-file-input').addEventListener('change', function (e) {
+            const file = e.target.files[0]; if (!file) return;
+            // Compress/resize before storing
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                const img = new Image();
+                img.onload = function () {
+                    const MAX_W = 1400;
+                    const scale = img.width > MAX_W ? MAX_W / img.width : 1;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.round(img.width * scale);
+                    canvas.height = Math.round(img.height * scale);
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+                    localStorage.setItem('boutique_hero_bg', dataUrl);
+                    applyHeroPreview(dataUrl);
+                    showToast('🖼️ ¡Fondo actualizado! Guarda la config.');
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function applyHeroPreview(dataUrl) {
+            const previewImg = document.getElementById('hero-preview-img');
+            const placeholder = document.getElementById('hero-placeholder');
+            const clearBtn = document.getElementById('hero-clear-btn');
+            if (dataUrl) {
+                previewImg.src = dataUrl;
+                previewImg.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                clearBtn.classList.remove('hidden');
+            } else {
+                previewImg.src = '';
+                previewImg.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+                clearBtn.classList.add('hidden');
+            }
+        }
+
+        function clearHeroBg() {
+            if (!confirm('¿Quitar la imagen de fondo del Mercadito?')) return;
+            localStorage.removeItem('boutique_hero_bg');
+            applyHeroPreview('');
+            showToast('🗑️ Fondo eliminado');
         }
 
         function showAddForm() {

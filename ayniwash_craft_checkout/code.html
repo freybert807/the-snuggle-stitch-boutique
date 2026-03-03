@@ -84,7 +84,8 @@
         <main class="flex-1 px-6 pt-12 max-w-2xl mx-auto w-full pb-32">
             <div class="text-center mb-10 space-y-2">
                 <h1 class="font-display text-4xl font-black italic text-slate-800">Tu Cestita</h1>
-                <p class="text-slate-400 font-medium italic italic">"Casi listos para llegar a su nueva Pacha"</p>
+                <p id="checkout-msg-display" class="text-slate-400 font-medium italic">"Casi listos para llegar a su
+                    nueva Pacha"</p>
             </div>
 
             <!-- Basket Container -->
@@ -92,20 +93,7 @@
                 class="relative bg-white p-8 rounded-[3rem] shadow-2xl border-4 border-dashed border-rosa-salina/10 mb-12 overflow-hidden">
                 <div class="wicker-pattern absolute inset-0 pointer-events-none"></div>
                 <div class="relative z-10 grid grid-cols-2 gap-6" id="cart-items">
-                    <!-- Dynamic Cart Items Placeholder -->
-                    <div class="bg-white p-3 rounded-3xl soft-shadow border border-slate-50 relative group">
-                        <div class="aspect-square rounded-2xl overflow-hidden mb-3 bg-slate-50">
-                            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBijgstwbSwKf1Z0lZu-nMWq6utBctxymqp-yzCru7a8_dPVjaaI-vNABvYQL9vL59ne5LB0972v2goQOCmh-izfrM1gUzHvCeGDm5ztJ9NI_wRDZsCZ0EACDFb6nnZNdjBQr0_gVh_X4ByZkXwNyz04fvi_YGCKVIMm8QhoScq0kFezWPp4z7LST8jpOfVkk61DDtQjDHYihw8KdINq2LXfsLOLi94gBXkyEo6"
-                                class="w-full h-full object-cover">
-                        </div>
-                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-800 text-center">Stitch
-                            Munay</p>
-                        <p class="text-[10px] font-black text-rosa-salina text-center mt-1">S/ 25.00</p>
-                        <button
-                            class="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full soft-shadow text-slate-300 hover:text-red-400 transition-colors flex items-center justify-center">
-                            <span class="material-symbols-outlined text-xs">close</span>
-                        </button>
-                    </div>
+                    <!-- Dynamic Cart Items Go Here -->
                 </div>
             </div>
 
@@ -121,18 +109,20 @@
                         <div class="border-y border-rosa-salina/10 py-4 space-y-2">
                             <div class="flex justify-between text-xs font-bold text-slate-400">
                                 <span>Subtotal:</span>
-                                <span class="text-slate-800">S/ 25.00</span>
+                                <span class="text-slate-800" id="cart-subtotal">S/ 0.00</span>
                             </div>
                             <div class="flex justify-between text-xs font-bold text-slate-400">
                                 <span class="flex items-center gap-1">Envío Mágico <span
                                         class="material-symbols-outlined text-[10px] text-azul-atardecer">auto_awesome</span></span>
-                                <span class="text-verde-salvia uppercase tracking-widest text-[10px]">Gratis</span>
+                                <span id="shipping-display"
+                                    class="text-verde-salvia uppercase tracking-widest text-[10px]">Gratis</span>
                             </div>
                         </div>
                         <div class="space-y-1">
                             <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">Total de la
                                 Adopción</p>
-                            <p class="font-display text-4xl font-black italic text-slate-800">S/ 25.00</p>
+                            <p class="font-display text-4xl font-black italic text-slate-800" id="cart-total">S/ 0.00
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -149,7 +139,7 @@
                 <div id="gift-section" class="hidden animate-up space-y-3">
                     <p class="text-xs text-slate-400 font-bold uppercase tracking-widest ml-1">Mensaje bordado con
                         Munay:</p>
-                    <textarea placeholder="Ej: Con mucho amor, para que te acompañe siempre..."
+                    <textarea id="gift-msg" placeholder="Ej: Con mucho amor, para que te acompañe siempre..."
                         class="w-full bg-crema-lana/50 border-none rounded-[1.5rem] text-sm p-4 focus:ring-2 focus:ring-rosa-salina/10 h-28 italic font-medium"></textarea>
                 </div>
             </div>
@@ -170,7 +160,7 @@
 
             <!-- Final Action -->
             <div class="mt-12 text-center space-y-6">
-                <button
+                <button onclick="confirmAdoption()"
                     class="w-full bg-rosa-salina text-white py-6 rounded-full text-xl font-black shadow-2xl shadow-rosa-salina/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4">
                     <span class="material-symbols-outlined text-3xl">auto_awesome</span>
                     ¡Confirmar Adopción Munday!
@@ -203,6 +193,121 @@
 
         const giftCheckbox = document.getElementById('gift-checkbox');
         const giftSection = document.getElementById('gift-section');
+        let discountPercent = 0;
+
+        // Checkout Configuration Setup
+        let checkoutConfig = JSON.parse(localStorage.getItem('boutique_config') || '{}');
+        let shippingCost = parseFloat(checkoutConfig.shippingCost) || 0;
+        const msgDisplay = document.getElementById('checkout-msg-display');
+        msgDisplay.textContent = checkoutConfig.checkoutMessage || '"Casi listos para llegar a su nueva Pacha"';
+
+        window.addEventListener('storage', () => {
+            checkoutConfig = JSON.parse(localStorage.getItem('boutique_config') || '{}');
+            shippingCost = parseFloat(checkoutConfig.shippingCost) || 0;
+            msgDisplay.textContent = checkoutConfig.checkoutMessage || '"Casi listos para llegar a su nueva Pacha"';
+            renderCart();
+        });
+
+        function renderCart() {
+            let items = [];
+            let parentAccess = false;
+            try {
+                if (window.parent && window.parent.cart) {
+                    items = window.parent.cart;
+                    parentAccess = true;
+                }
+            } catch (e) { } // CORS Blocked
+
+            if (!parentAccess) {
+                try {
+                    items = JSON.parse(localStorage.getItem('boutique_cart') || '[]');
+                    if (!Array.isArray(items)) items = [];
+                } catch (e) {
+                    items = [];
+                }
+            }
+            const container = document.getElementById('cart-items');
+
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-2 text-center py-8">
+                        <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">shopping_basket</span>
+                        <p class="text-sm font-bold text-slate-400 italic">Tu cestita está esperando por nuevos amigos...</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = items.map(p => `
+                    <div class="bg-white p-3 rounded-3xl soft-shadow border border-slate-50 relative group">
+                        <div class="aspect-square rounded-2xl overflow-hidden mb-3 bg-slate-50 relative">
+                            <img src="${p.img_base64 || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23f4b0a422\'/%3E%3C/svg%3E'}"
+                                class="w-full h-full object-cover">
+                            ${p.quantity > 1 ? `<div class="absolute bottom-2 right-2 bg-slate-800 text-white text-[10px] font-black h-5 w-5 rounded-full flex items-center justify-center">${p.quantity}</div>` : ''}
+                        </div>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-800 text-center line-clamp-1">${p.nombre}</p>
+                        <p class="text-[10px] font-black text-rosa-salina text-center mt-1">S/ ${(Number(p.precio) * p.quantity).toFixed(2)}</p>
+                        <button onclick="removeItem('${p.id}')"
+                            class="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full soft-shadow text-slate-300 hover:text-red-400 transition-colors flex items-center justify-center">
+                            <span class="material-symbols-outlined text-xs">close</span>
+                        </button>
+                    </div>
+                `).join('');
+            }
+            updateTotals(items);
+        }
+
+        function removeItem(id) {
+            let pushedToParent = false;
+            try {
+                if (window.parent && window.parent.cart && window.parent.setCart) {
+                    window.parent.setCart(window.parent.cart.filter(item => String(item.id) !== String(id)));
+                    pushedToParent = true;
+                }
+            } catch (e) { } // CORS Blocked
+
+            if (!pushedToParent) {
+                let cart = [];
+                try {
+                    cart = JSON.parse(localStorage.getItem('boutique_cart') || '[]');
+                    if (!Array.isArray(cart)) cart = [];
+                } catch (e) {
+                    cart = [];
+                }
+                cart = cart.filter(i => String(i.id) !== String(id));
+                localStorage.setItem('boutique_cart', JSON.stringify(cart));
+
+                // Fallback sync message
+                try {
+                    window.parent.postMessage({ type: 'cart-updated', payload: cart }, '*');
+                } catch (e) { }
+            }
+            renderCart();
+        }
+
+        function updateTotals(items) {
+            let subtotal = items.reduce((sum, p) => sum + (Number(p.precio) * p.quantity), 0);
+            let total = subtotal + shippingCost;
+
+            if (giftCheckbox.checked) {
+                total += 5.00;
+            }
+            if (discountPercent > 0) {
+                total -= total * (discountPercent / 100);
+            }
+
+            document.getElementById('cart-subtotal').textContent = `S/ ${subtotal.toFixed(2)}`;
+            document.getElementById('cart-total').textContent = `S/ ${total.toFixed(2)}`;
+
+            const shippingDisplay = document.getElementById('shipping-display');
+            if (shippingCost > 0) {
+                shippingDisplay.textContent = `S/ ${shippingCost.toFixed(2)}`;
+                shippingDisplay.classList.remove('text-verde-salvia', 'uppercase', 'tracking-widest', 'text-[10px]');
+                shippingDisplay.classList.add('text-slate-800');
+            } else {
+                shippingDisplay.textContent = 'Gratis';
+                shippingDisplay.classList.add('text-verde-salvia', 'uppercase', 'tracking-widest', 'text-[10px]');
+                shippingDisplay.classList.remove('text-slate-800');
+            }
+        }
 
         giftCheckbox.addEventListener('change', () => {
             if (giftCheckbox.checked) {
@@ -212,6 +317,7 @@
                 giftSection.classList.add('hidden');
                 giftSection.classList.remove('block');
             }
+            renderCart(); // to trigger updateTotals
         });
 
         function applyMagic() {
@@ -227,11 +333,69 @@
             } else if (input === 'cuscoten') {
                 msg.textContent = "🎀 ¡Cupón aceptado! 10% de magia aplicada.";
                 msg.classList.add('text-verde-salvia');
+                discountPercent = 10;
+                renderCart();
             } else {
                 msg.textContent = "¡Ups! Ese código no tiene magia aún 🧶";
                 msg.classList.add('text-red-400');
+                discountPercent = 0;
+                renderCart();
             }
         }
+
+        function confirmAdoption() {
+            let cart = [];
+            try {
+                if (window.parent && window.parent.cart) {
+                    cart = window.parent.cart;
+                } else {
+                    cart = JSON.parse(localStorage.getItem('boutique_cart') || '[]');
+                }
+            } catch (e) {
+                cart = JSON.parse(localStorage.getItem('boutique_cart') || '[]');
+            }
+            if (!Array.isArray(cart) || cart.length === 0) {
+                alert("¡Tu cestita está vacía! Añade un compañero antes de confirmar.");
+                return;
+            }
+
+            let subtotal = cart.reduce((sum, p) => sum + (Number(p.precio) * p.quantity), 0);
+            let rawTotal = subtotal + shippingCost;
+            let total = rawTotal;
+            if (giftCheckbox.checked) total += 5.00;
+            let discountAmt = 0;
+            if (discountPercent > 0) {
+                discountAmt = total * (discountPercent / 100);
+                total -= discountAmt;
+            }
+
+            let txt = `¡Hola! Vengo de la web *The Snuggle Stitch Boutique* y quiero confirmar la adopción de mis nuevos compañeros:\n\n`;
+
+            cart.forEach(item => {
+                txt += `🧶 ${item.quantity}x ${item.nombre} - S/ ${(Number(item.precio) * item.quantity).toFixed(2)}\n`;
+            });
+
+            txt += `\n📦 Subtotal: S/ ${subtotal.toFixed(2)}`;
+            if (shippingCost > 0) txt += `\n🚚 Envío: S/ ${shippingCost.toFixed(2)}`;
+            if (giftCheckbox.checked) txt += `\n🎁 Empaque de Regalo: S/ 5.00`;
+            if (discountPercent > 0) txt += `\n✨ Descuento Mágico (${discountPercent}%): -S/ ${discountAmt.toFixed(2)}`;
+            txt += `\n\n💰 *Total de la Adopción:* S/ ${total.toFixed(2)}\n`;
+
+            if (giftCheckbox.checked) {
+                const msg = document.getElementById('gift-msg').value;
+                if (msg) txt += `\n💝 *Mensaje para el regalo:* "${msg}"`;
+            }
+
+            txt += `\n\n¿Cuáles son los pasos a seguir?`;
+
+            const encoded = encodeURIComponent(txt);
+            window.open(`https://wa.me/51940813473?text=${encoded}`, '_blank');
+        }
+
+        // Initialize Call
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCart();
+        });
     </script>
 </body>
 
