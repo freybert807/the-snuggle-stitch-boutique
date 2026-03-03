@@ -199,10 +199,12 @@
         });
 
         whatsappBtn.addEventListener('click', () => {
+            const config = JSON.parse(localStorage.getItem('boutique_config') || '{}');
+            const wNum = config.whatsappNumber || '51986848100';
             const details = detailsInput.value || "suave y muy tierno";
             const message = `¡Hola! Vengo de la web de The Snuggle Stitch Boutique. Me encantaría saber si pueden tejer este diseño en el Taller Ayni: ${details}. ¿Me ayudan con una cotización?`;
             const encodedMessage = encodeURIComponent(message);
-            const whatsappUrl = `https://wa.me/51940813473?text=${encodedMessage}`;
+            const whatsappUrl = `https://wa.me/${wNum.replace(/[^0-9]/g, '')}?text=${encodedMessage}`;
 
             confirmationMsg.classList.remove('hidden');
 

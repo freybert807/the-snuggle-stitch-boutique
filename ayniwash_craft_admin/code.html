@@ -150,10 +150,10 @@
                                 placeholder='"Casi listos para llegar a su nueva Pacha"'></textarea>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[10px] font-black uppercase text-secondary">Costo de Envío (S/)</label>
-                            <input type="number" id="shipping-cost-input" step="0.5" min="0"
-                                class="w-full rounded-xl border-slate-100 focus:ring-primary focus:border-primary text-sm font-bold"
-                                placeholder="0 para envío gratis">
+                            <label class="text-[10px] font-black uppercase text-secondary">Número de WhatsApp</label>
+                            <input type="text" id="whatsapp-number-input"
+                                class="w-full rounded-xl border-slate-100 focus:ring-primary focus:border-primary text-sm font-bold tracking-widest text-slate-800"
+                                placeholder="Ej: 51986848100">
                         </div>
                         <div class="space-y-1 pt-4 border-t border-slate-100">
                             <label class="text-[10px] font-black uppercase text-slate-400">Compañero del Mes ⭐</label>
@@ -430,7 +430,7 @@
                 homeTitle: document.getElementById('home-title-input').value,
                 homeWelcome: document.getElementById('home-welcome-input').value,
                 checkoutMessage: document.getElementById('checkout-msg-input').value,
-                shippingCost: parseFloat(document.getElementById('shipping-cost-input').value) || 0,
+                whatsappNumber: document.getElementById('whatsapp-number-input').value.trim() || '51986848100',
             };
             localStorage.setItem('boutique_config', JSON.stringify(config));
             window.dispatchEvent(new Event('storage'));
@@ -447,7 +447,7 @@
             document.getElementById('home-title-input').value = config.homeTitle || '';
             document.getElementById('home-welcome-input').value = config.homeWelcome || '';
             document.getElementById('checkout-msg-input').value = config.checkoutMessage || '"Casi listos para llegar a su nueva Pacha"';
-            document.getElementById('shipping-cost-input').value = config.shippingCost || 0;
+            document.getElementById('whatsapp-number-input').value = config.whatsappNumber || '51986848100';
             // Load hero bg preview
             const heroBg = localStorage.getItem('boutique_hero_bg') || '';
             applyHeroPreview(heroBg);
